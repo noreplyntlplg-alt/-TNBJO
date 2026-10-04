@@ -10,6 +10,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link
         href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
@@ -24,7 +25,7 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- HTML2Canvas: แปลงเอกสารภาษาไทยเป็นภาพก่อนพิมพ์ -->
+    <!-- HTML2Canvas -->
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
         crossorigin="anonymous"
@@ -502,6 +503,7 @@
 
     <!-- Navigation -->
     <nav class="navigation no-print">
+
         <button class="btn active" id="tabNew" onclick="showTab('new')">
             <i class="fa-solid fa-file-circle-plus"></i>
             ออกใบสั่งจ่าย
@@ -516,12 +518,14 @@
             <i class="fa-solid fa-gear"></i>
             ตั้งค่าหน่วยงาน
         </button>
+
     </nav>
 
     <!-- New Payment -->
     <section id="new">
 
         <div class="panel">
+
             <h2 class="panel-title">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
                 แบบบันทึกใบสั่งจ่าย / ข้อมูลเช็ค
@@ -663,6 +667,7 @@
                     </button>
 
                 </div>
+
             </form>
         </div>
 
@@ -708,10 +713,10 @@
             </div>
 
             <p class="muted no-print">
-                การพิมพ์ผ่านระบบจะเรนเดอร์เอกสารภาษาไทยเป็นภาพก่อนพิมพ์
-                เพื่อหลีกเลี่ยงปัญหาชุดรหัสภาษาไทยของเครื่องพิมพ์
-                กรุณาเลือกเครื่องพิมพ์ PHOMARK JHP-A1 และกระดาษ 80 มม.
-                การพิมพ์ผ่าน Bluetooth BLE ยังขึ้นอยู่กับโปรโตคอลของเครื่องพิมพ์
+                ระบบจะแปลงเอกสารภาษาไทยเป็นภาพก่อนพิมพ์
+                เพื่อลดปัญหาภาษาไทยเพี้ยนจากชุดรหัสของเครื่องพิมพ์
+                กรุณาเลือก PHOMARK JHP-A1 และกระดาษ 80 มม.
+                การตัดกระดาษขึ้นอยู่กับไดรเวอร์และรุ่นเครื่องพิมพ์
             </p>
 
         </div>
@@ -859,6 +864,12 @@
 
 const API_URL =
     "https://script.google.com/macros/s/AKfycbxMHl5gxxBUD0vrJ__NiODP_dChkNRJZlqKVK4HyixlPPVGSlAjcI0eh1q-95n6n_ZC/exec";
+
+/*
+ * หมายเหตุด้านความปลอดภัย:
+ * API_KEY ที่อยู่ใน HTML สามารถถูกดูได้จาก Browser
+ * ควรเปลี่ยนรหัสที่เปิดเผยแล้ว และตรวจสอบสิทธิ์ที่ฝั่ง Apps Script
+ */
 
 const API_KEY =
     "TNBJO-2026-PV-8fK29xQ7mL4vR6pW3zN1aB5c";
@@ -1802,16 +1813,26 @@ function printRecord(id, type) {
         behavior: "smooth",
         block: "start"
     });
-
-    /*
-     * ไม่เรียก window.print() ทันที
-     * ให้ผู้ใช้กดปุ่มพิมพ์ภาพจาก Preview
-     * เพื่อป้องกันการพิมพ์ก่อน Font/Preview พร้อม
-     */
 }
 
 /* =====================================================
-   RENDER THAI DOCUMENT AS IMAGE AND PRINT
+   THAI FONT READY HELPER
+   ===================================================== */
+
+async function waitForThaiFont() {
+    if (!document.fonts) return;
+
+    try {
+        await document.fonts.load('12px "Sarabun"');
+        await document.fonts.load('700 16px "Sarabun"');
+        await document.fonts.ready;
+    } catch (error) {
+        console.warn("ไม่สามารถโหลด Sarabun ได้:", error);
+    }
+}
+
+/* =====================================================
+   RENDER DOCUMENT AS IMAGE AND PRINT
    PHOMARK JHP-A1 - 80MM
    ===================================================== */
 
@@ -1848,6 +1869,7 @@ async function printAsImage() {
 
     if (printButton) {
         printButton.disabled = true;
+
         printButton.innerHTML =
             '<i class="fa-solid fa-spinner fa-spin"></i> กำลังสร้างภาพเอกสาร...';
     }
@@ -1857,8 +1879,8 @@ async function printAsImage() {
     try {
 
         /*
-         * เปิดหน้าต่างก่อนเริ่มงาน async
-         * เพื่อหลีกเลี่ยง Popup Blocker
+         * เปิดหน้าต่างทันทีจากการคลิกของผู้ใช้
+         * ลดโอกาสถูก Popup Blocker
          */
 
         printWindow = window.open(
@@ -1961,16 +1983,23 @@ async function printAsImage() {
         printWindow.document.close();
 
         /*
-         * รอโหลดฟอนต์ภาษาไทยก่อนเรนเดอร์
+         * รอ Font ภาษาไทยก่อนแปลงเอกสาร
          */
 
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
+        await waitForThaiFont();
 
         /*
-         * เรนเดอร์เฉพาะพื้นที่เอกสาร
-         * ไม่เปลี่ยน HTML ของเอกสารต้นฉบับ
+         * รอ Browser วาดเอกสาร
+         */
+
+        await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+        /*
+         * สร้างภาพจากเอกสารจริง
          */
 
         const canvas = await html2canvas(printArea, {
@@ -2001,37 +2030,62 @@ async function printAsImage() {
                 const clonedArea =
                     clonedDocument.getElementById("printArea");
 
-                if (clonedArea) {
+                if (!clonedArea) return;
 
-                    clonedArea.style.display = "block";
+                clonedArea.style.display = "block";
 
-                    clonedArea.style.visibility = "visible";
+                clonedArea.style.visibility = "visible";
 
-                    clonedArea.style.width = "80mm";
+                clonedArea.style.position = "static";
 
-                    clonedArea.style.maxWidth = "80mm";
+                clonedArea.style.width = "80mm";
 
-                    clonedArea.style.margin = "0 auto";
+                clonedArea.style.maxWidth = "80mm";
 
-                    clonedArea.style.padding = "4mm";
+                clonedArea.style.minWidth = "80mm";
 
-                    clonedArea.style.background = "#ffffff";
+                clonedArea.style.margin = "0 auto";
 
-                    clonedArea.style.color = "#111111";
+                clonedArea.style.padding = "4mm";
 
-                    clonedArea.style.fontFamily =
-                        '"Sarabun", sans-serif';
+                clonedArea.style.background = "#ffffff";
 
-                    clonedArea.style.fontSize = "12px";
+                clonedArea.style.color = "#111111";
 
-                    clonedArea.style.lineHeight = "1.55";
+                clonedArea.style.fontFamily =
+                    '"Sarabun", sans-serif';
 
-                    clonedArea.style.overflow = "visible";
+                clonedArea.style.fontSize = "12px";
 
-                    clonedArea.style.height = "auto";
+                clonedArea.style.lineHeight = "1.55";
 
-                    clonedArea.style.maxHeight = "none";
-                }
+                clonedArea.style.overflow = "visible";
+
+                clonedArea.style.height = "auto";
+
+                clonedArea.style.maxHeight = "none";
+
+                clonedArea.style.boxShadow = "none";
+
+                clonedArea.style.border = "0";
+
+                const clonedStyle =
+                    clonedDocument.createElement("style");
+
+                clonedStyle.textContent = `
+                    #printArea,
+                    #printArea * {
+                        font-family: "Sarabun", sans-serif !important;
+                        color: #111111 !important;
+                        text-shadow: none !important;
+                    }
+
+                    #printArea {
+                        background: #ffffff !important;
+                    }
+                `;
+
+                clonedDocument.head.appendChild(clonedStyle);
             }
         });
 
@@ -2040,8 +2094,8 @@ async function printAsImage() {
         }
 
         /*
-         * สร้าง PNG จาก Canvas
-         * อักษรไทยกลายเป็นภาพ ไม่ต้องอาศัย Font ในเครื่องพิมพ์
+         * แปลง Canvas เป็น PNG
+         * ภาษาไทยจะถูกเก็บเป็นภาพ ไม่ใช่ข้อความ UTF-8 ดิบ
          */
 
         const imageData = canvas.toDataURL("image/png");
@@ -2064,7 +2118,7 @@ async function printAsImage() {
         imagePage.appendChild(image);
 
         /*
-         * รอภาพโหลดจริงก่อนสั่งพิมพ์
+         * รอภาพโหลดสมบูรณ์
          */
 
         await new Promise((resolve, reject) => {
@@ -2084,7 +2138,7 @@ async function printAsImage() {
         });
 
         /*
-         * รอ Browser คำนวณ Layout
+         * รอ Layout ก่อนเปิดหน้าต่างพิมพ์
          */
 
         await new Promise((resolve) => {
@@ -2100,9 +2154,11 @@ async function printAsImage() {
         Swal.fire({
             icon: "success",
             title: "สร้างภาพเอกสารสำเร็จ",
-            text:
-                "กรุณาเลือก PHOMARK JHP-A1 " +
-                "ตั้งค่ากระดาษ 80 มม. และตรวจสอบตัวอย่างก่อนพิมพ์"
+            html:
+                "กรุณาเลือกเครื่องพิมพ์ <b>PHOMARK JHP-A1</b><br>" +
+                "ตั้งค่ากระดาษ 80 มม.<br>" +
+                "เลือก Scale เป็น 100% หรือ Actual Size<br>" +
+                "และตรวจสอบตัวอย่างก่อนพิมพ์"
         });
 
     } catch (error) {
@@ -2133,139 +2189,59 @@ async function printAsImage() {
 }
 
 /* =====================================================
-   BLUETOOTH BLE PRINT
+   BLUETOOTH PRINT
    ===================================================== */
 
+/*
+ * ไม่ส่งข้อความภาษาไทย UTF-8 ดิบไปยังเครื่องพิมพ์
+ * เพราะอาจทำให้ภาษาไทยเพี้ยนจากชุดรหัสที่เครื่องรองรับ
+ *
+ * ใช้การพิมพ์ผ่านภาพเป็นเส้นทางหลักแทน
+ */
+
 async function printBluetooth() {
-    if (!navigator.bluetooth) {
-        Swal.fire({
-            icon: "info",
-            title: "เบราว์เซอร์ไม่รองรับ Web Bluetooth",
-            text:
-                "กรุณาใช้ Chrome หรือ Edge ที่รองรับ BLE " +
-                "หรือพิมพ์ผ่านปุ่มพิมพ์ผ่านระบบ"
-        });
 
-        return;
-    }
+    const result = await Swal.fire({
 
-    if (!$("printArea").innerText.trim()) {
-        Swal.fire(
-            "ไม่มีเอกสาร",
-            "กรุณาสร้างตัวอย่างเอกสารก่อนพิมพ์",
-            "warning"
-        );
-
-        return;
-    }
-
-    Swal.fire({
         icon: "warning",
-        title: "Bluetooth BLE",
-        text:
-            "ฟังก์ชันนี้ส่งข้อมูลข้อความดิบ " +
-            "จึงอาจยังแสดงภาษาไทยผิดกับ PHOMARK JHP-A1 " +
-            "แนะนำให้ใช้ปุ่มพิมพ์ผ่านระบบซึ่งแปลงเอกสารเป็นภาพ",
+
+        title: "การพิมพ์ภาษาไทยผ่าน Bluetooth",
+
+        html:
+            "การส่งข้อความ UTF-8 ดิบผ่าน BLE อาจทำให้ภาษาไทยเพี้ยน " +
+            "เนื่องจากเครื่องพิมพ์ต้องรองรับชุดรหัสและโปรโตคอลที่ตรงกัน" +
+            "<br><br>" +
+            "ระบบจะแนะนำให้ใช้การพิมพ์ผ่านภาพเอกสาร " +
+            "เพื่อรักษารูปแบบภาษาไทย",
+
         showCancelButton: true,
-        confirmButtonText: "ดำเนินการต่อ",
+
+        confirmButtonText: "ใช้การพิมพ์ผ่านภาพ",
+
         cancelButtonText: "ยกเลิก"
-    }).then(async (result) => {
-
-        if (!result.isConfirmed) return;
-
-        try {
-            const device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: [
-                    "000018f0-0000-1000-8000-00805f9b34fb"
-                ]
-            });
-
-            const server = await device.gatt.connect();
-
-            const services = await server.getPrimaryServices();
-
-            let characteristic = null;
-
-            for (const service of services) {
-                try {
-                    const characteristics =
-                        await service.getCharacteristics();
-
-                    for (const item of characteristics) {
-                        if (
-                            item.properties.write ||
-                            item.properties.writeWithoutResponse
-                        ) {
-                            characteristic = item;
-                            break;
-                        }
-                    }
-                } catch (error) {
-                    // ข้าม Service ที่ไม่อนุญาตให้อ่าน
-                }
-
-                if (characteristic) break;
-            }
-
-            if (!characteristic) {
-                throw new Error(
-                    "ไม่พบ BLE characteristic สำหรับส่งข้อมูลพิมพ์"
-                );
-            }
-
-            const textContent =
-                $("printArea").innerText.replace(/\n/g, "\r\n") +
-                "\r\n\r\n";
-
-            const bytes =
-                new TextEncoder().encode(textContent);
-
-            const chunkSize = 180;
-
-            for (
-                let index = 0;
-                index < bytes.length;
-                index += chunkSize
-            ) {
-                const chunk = bytes.slice(
-                    index,
-                    index + chunkSize
-                );
-
-                if (characteristic.properties.writeWithoutResponse) {
-                    await characteristic.writeValueWithoutResponse(chunk);
-                } else {
-                    await characteristic.writeValue(chunk);
-                }
-            }
-
-            Swal.fire({
-                icon: "info",
-                title: "ส่งข้อมูลแล้ว",
-                text:
-                    "กรุณาตรวจสอบภาษาไทยที่พิมพ์ออกมา " +
-                    "หากยังผิด ให้ใช้ปุ่มพิมพ์ผ่านระบบ"
-            });
-
-        } catch (error) {
-            Swal.fire({
-                icon: "warning",
-                title: "เชื่อมต่อหรือพิมพ์ไม่สำเร็จ",
-                text: error.message
-            });
-        }
     });
+
+    if (!result.isConfirmed) return;
+
+    await printAsImage();
 }
+
+/* =====================================================
+   PAPER CUT INFORMATION
+   ===================================================== */
 
 function cutPaperHint() {
     Swal.fire({
         icon: "info",
         title: "ข้อจำกัดการตัดกระดาษ",
-        text:
+        html:
             "การพิมพ์ภาพผ่านหน้าต่างพิมพ์จะใช้การตั้งค่าของไดรเวอร์ " +
-            "หากต้องการตัดกระดาษอัตโนมัติ ต้องเปิดตัวเลือกตัดกระดาษ " +
-            "ในไดรเวอร์หรือใช้คำสั่ง ESC/POS ที่เครื่องรองรับ"
+            "<br><br>" +
+            "หากต้องการตัดกระดาษอัตโนมัติ " +
+            "ให้เปิดตัวเลือกตัดกระดาษในไดรเวอร์ " +
+            "หรือใช้คำสั่ง ESC/POS ที่เครื่องรองรับ " +
+            "<br><br>" +
+            "การตัดผ่าน Bluetooth โดยตรงต้องทราบโปรโตคอลของเครื่องพิมพ์"
     });
 }
 
@@ -2439,4 +2415,4 @@ initialize();
 </script>
 
 </body>
-                    </html>
+                                                            </html>
