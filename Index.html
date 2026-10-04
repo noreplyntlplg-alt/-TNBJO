@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="th"><head><base target="_top"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TNBJO | ระบบออกเช็คและใบสั่งจ่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+:root{--navy:#183153;--blue:#24496e;--ink:#243247;--muted:#6b7788;--line:#dce3eb;--bg:#f3f5f8;--white:#fff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Sarabun,sans-serif}.top{background:var(--navy);color:white;padding:17px 24px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:19px;font-weight:700;letter-spacing:.3px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.75}.wrap{max-width:1400px;margin:auto;padding:22px}.nav{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:white;color:var(--ink);border-radius:6px;padding:9px 14px;font:600 13px Sarabun;cursor:pointer}.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}.btn.danger{color:#a52828}.btn.active{background:#e8eef5;border-color:#b7c7d8;color:var(--navy)}.panel{background:white;border:1px solid var(--line);border-radius:9px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px #1b35500a}.panel h2{font-size:17px;margin:0 0 16px;color:var(--navy)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.field label{display:block;font-weight:600;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid #cbd5df;border-radius:5px;padding:9px;font:14px Sarabun;background:#fff;color:var(--ink)}.field textarea{min-height:72px}.wide{grid-column:span 2}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:10px;border-bottom:1px solid #e8edf2;text-align:left;white-space:nowrap}th{background:#f4f7fa;color:#42556b;font-weight:700}td.money{text-align:right;font-variant-numeric:tabular-nums}.status{padding:3px 8px;border-radius:20px;background:#fff4d9;color:#8b6200;font-size:12px}.muted{color:var(--muted)}.hidden{display:none}.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.toolbar input{padding:8px;border:1px solid var(--line);border-radius:5px;font:14px Sarabun}.printdoc{width:80mm;margin:auto;background:white;color:#111;padding:4mm;font:12px Sarabun;line-height:1.45}.printdoc h3{text-align:center;font-size:16px;margin:4px 0}.printdoc .center{text-align:center}.printdoc .rule{border-top:1px dashed #333;margin:8px 0}.printdoc .amount{text-align:right;font-size:15px;font-weight:bold}.printdoc .sign{display:flex;justify-content:space-between;text-align:center;margin-top:25px}.printdoc .sign div{width:48%}.foot{font-size:10px;text-align:center;margin-top:14px}
+@media(max-width:750px){.wrap{padding:12px}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.top{padding:14px}.toolbar{align-items:stretch;flex-direction:column}}
+@media print{body{background:#fff}.top,.nav,.no-print,.panel:not(.to-print){display:none!important}.wrap{padding:0}.to-print{border:0;box-shadow:none;padding:0}.printdoc{width:80mm;margin:0;padding:3mm}}
+</style></head><body>
+<header class="top"><div class="brand"><i class="fa-solid fa-building-columns"></i> TNBJO <small>ระบบออกเช็คและใบสั่งจ่าย | Government Payment System</small></div><div id="clock" class="muted" style="color:#dce6f1"></div></header>
+<main class="wrap">
+<div class="nav no-print"><button class="btn active" id="tabNew" onclick="showTab('new')"><i class="fa-solid fa-file-circle-plus"></i> ออกใบสั่งจ่าย</button><button class="btn" id="tabList" onclick="showTab('list')"><i class="fa-solid fa-list"></i> ทะเบียนรายการ</button><button class="btn" id="tabSettings" onclick="showTab('settings')"><i class="fa-solid fa-gear"></i> ตั้งค่าหน่วยงาน</button></div>
+<section id="new">
+<div class="panel"><h2><i class="fa-solid fa-file-invoice-dollar"></i> แบบบันทึกใบสั่งจ่าย / ข้อมูลเช็ค</h2>
+<form id="paymentForm"><input type="hidden" id="id"><input type="hidden" id="number">
+<div class="grid">
+<div class="field"><label>วันที่เอกสาร *</label><input type="date" id="date" required></div>
+<div class="field"><label>เลขที่ใบสั่งจ่าย</label><input id="numberView" disabled placeholder="กำหนดเมื่อบันทึก"></div>
+<div class="field"><label>สถานะ</label><select id="status"><option>รออนุมัติ</option><option>อนุมัติแล้ว</option><option>จ่ายเงินแล้ว</option><option>ยกเลิก</option></select></div>
+<div class="field"><label>ผู้รับเงิน / เจ้าหนี้ *</label><input id="payee" required></div>
+<div class="field"><label>เลขประจำตัวผู้เสียภาษี / เลขบัตร</label><input id="taxid"></div>
+<div class="field"><label>หมวดรายจ่าย</label><select id="category"><option>งบดำเนินงาน</option><option>งบลงทุน</option><option>งบเงินอุดหนุน</option><option>งบรายจ่ายอื่น</option><option>ทั่วไป</option></select></div>
+<div class="field wide"><label>รายการ / เหตุผลการจ่าย *</label><textarea id="description" required></textarea></div>
+<div class="field"><label>จำนวนเงิน (บาท) *</label><input id="amount" type="number" min="0.01" step="0.01" required></div>
+<div class="field"><label>วิธีจ่าย</label><select id="method"><option>เช็ค</option><option>โอนเงิน</option><option>เงินสด</option></select></div>
+<div class="field"><label>ธนาคาร / สาขา</label><input id="bank"></div>
+<div class="field"><label>เลขที่เช็ค</label><input id="cheque"></div>
+<div class="field"><label>ผู้จัดทำ</label><input id="maker"></div>
+<div class="field"><label>ผู้อนุมัติ</label><input id="approver"></div>
+<div class="field wide"><label>หมายเหตุ</label><textarea id="note"></textarea></div>
+</div><div class="actions no-print"><button class="btn primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> บันทึกรายการ</button><button class="btn" type="button" onclick="clearForm()">ล้างข้อมูล</button><button class="btn" type="button" onclick="previewDoc('voucher')"><i class="fa-solid fa-print"></i> พิมพ์ใบสั่งจ่าย 80 มม.</button><button class="btn" type="button" onclick="previewDoc('cheque')"><i class="fa-solid fa-money-check"></i> พิมพ์แบบเช็ค 80 มม.</button></div></form></div>
+<div class="panel to-print hidden" id="printPanel"><div id="printArea" class="printdoc"></div><div class="actions no-print"><button class="btn primary" onclick="window.print()"><i class="fa-solid fa-print"></i> พิมพ์</button><button class="btn" onclick="printBluetooth()"><i class="fa-brands fa-bluetooth"></i> เชื่อมต่อเครื่องพิมพ์ BLE</button><button class="btn" onclick="cutPaperHint()">ตรวจสอบการตัดกระดาษ</button></div><p class="muted no-print">การพิมพ์ผ่านเบราว์เซอร์ใช้หน้าต่างพิมพ์ของอุปกรณ์ ส่วน Bluetooth ตรงรองรับเฉพาะเครื่องพิมพ์ BLE ที่เปิด GATT characteristic สำหรับเขียนข้อมูล ไม่ครอบคลุม Bluetooth Classic/SPP ทุกยี่ห้อ</p></div>
+</section>
+<section id="list" class="hidden"><div class="panel"><div class="toolbar"><h2>ทะเบียนคุมใบสั่งจ่าย</h2><input id="search" placeholder="ค้นหาเลขที่ / ผู้รับเงิน / รายการ" oninput="renderList()"></div><div class="tablewrap"><table><thead><tr><th>เลขที่</th><th>วันที่</th><th>ผู้รับเงิน</th><th>รายการ</th><th>จำนวนเงิน</th><th>สถานะ</th><th>ดำเนินการ</th></tr></thead><tbody id="rows"></tbody></table></div></div></section>
+<section id="settings" class="hidden"><div class="panel"><h2>ตั้งค่าหน่วยงาน</h2><div class="field"><label>ชื่อหน่วยงาน</label><input id="org" placeholder="ชื่อส่วนราชการ / หน่วยงาน"></div><div class="actions"><button class="btn primary" onclick="saveOrg()">บันทึกการตั้งค่า</button><button class="btn" onclick="api({action:'init'}).then(x=>window.open(x.spreadsheetUrl,'_blank')).catch(e=>Swal.fire('ผิดพลาด',e.message,'error'))">เปิด Google Sheets</button></div></div></section>
+</main>
+<script>
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE";
+const API_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET";
+function api(params){return new Promise((resolve,reject)=>{if(API_URL.includes("PASTE_YOUR")){reject(new Error("กรุณากำหนด API_URL ของ Apps Script ก่อน"));return}const cb="tnbjo_cb_"+Date.now()+"_"+Math.floor(Math.random()*1e6);const s=document.createElement("script");const q=new URLSearchParams({...params,key:API_KEY,callback:cb});window[cb]=data=>{delete window[cb];s.remove();data&&data.ok?resolve(data):reject(new Error(data?.error||"API error"))};s.onerror=()=>{delete window[cb];s.remove();reject(new Error("เรียก API ไม่สำเร็จ ตรวจสอบ URL และการ Deploy"))};s.src=API_URL+"?"+q.toString();document.body.appendChild(s)})}
+let records=[], settings={}, currentDoc='voucher';
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(n){return Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function bahtText(num){num=Number(num||0).toFixed(2);let [a,b]=num.split('.');const d=['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];const u=['','สิบ','ร้อย','พัน','หมื่น','แสน','ล้าน'];function part(s){let out='';for(let i=0;i<s.length;i++){let x=+s[i],p=s.length-i-1;if(!x)continue;if(p===0&&x===1&&s.length>1)out+='เอ็ด';else if(p===1&&x===1)out+='สิบ';else if(p===1&&x===2)out+='ยี่สิบ';else out+=d[x]+u[p%6];if(p===6)out+='ล้าน'}return out||'ศูนย์'}return part(a)+'บาท'+(+b?part(b)+'สตางค์':'ถ้วน')}
+function load(){api({action:'init'}).then(x=>{records=x.records||[];settings=x.settings||{};$('org').value=settings.org||'ชื่อหน่วยงานของท่าน';renderList()}).catch(err=>Swal.fire('เชื่อมต่อไม่สำเร็จ',err.message,'error'))}
+function showTab(t){['new','list','settings'].forEach(x=>$(x).classList.toggle('hidden',x!==t));['New','List','Settings'].forEach(x=>$('tab'+x).classList.toggle('active',x.toLowerCase()===t))}
+function clearForm(){ $('paymentForm').reset();$('id').value='';$('number').value='';$('numberView').value='';$('date').value=today();$('printPanel').classList.add('hidden')}
+function formData(){return Object.fromEntries(['id','number','date','payee','taxid','description','category','amount','method','bank','cheque','status','maker','approver','note'].map(k=>[k,$(k).value]))}
+$('paymentForm').addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'ยืนยันบันทึกรายการ?',text:'โปรดตรวจสอบผู้รับเงินและจำนวนเงินก่อนบันทึก',icon:'question',showCancelButton:true,confirmButtonText:'บันทึก',cancelButtonText:'ตรวจสอบอีกครั้ง'}).then(r=>{if(!r.isConfirmed)return;api({action:'save',...formData()}).then(x=>{Swal.fire('บันทึกสำเร็จ',x.record.number,'success');$('id').value=x.record.id;$('number').value=x.record.number;$('numberView').value=x.record.number;load()}).catch(e=>Swal.fire('ผิดพลาด',e.message,'error'))})});
+function renderList(){let q=($('search')?.value||'').toLowerCase();$('rows').innerHTML=records.filter(r=>(r.number+r.payee+r.description).toLowerCase().includes(q)).map(r=>`<tr><td>${esc(r.number)}</td><td>${esc(r.date)}</td><td>${esc(r.payee)}</td><td>${esc(r.description)}</td><td class="money">${money(r.amount)}</td><td><span class="status">${esc(r.status)}</span></td><td><button class="btn" onclick="edit('${r.id}')">เปิด</button> <button class="btn" onclick="printRecord('${r.id}','voucher')">พิมพ์</button></td></tr>`).join('')}
+function edit(id){let r=records.find(x=>x.id===id);if(!r)return;Object.keys(r).forEach(k=>{if($(k))$(k).value=r[k]??''});$('numberView').value=r.number;showTab('new')}
+function docMarkup(r,type){let org=settings.org||$('org').value||'ชื่อหน่วยงานของท่าน';let title=type==='cheque'?'แบบรายละเอียดการสั่งจ่ายเช็ค':'ใบสั่งจ่ายเงิน';return `<div class="center"><b>${esc(org)}</b><br>ระบบงานการเงินและบัญชี</div><div class="rule"></div><h3>${title}</h3><div class="center">เลขที่ ${esc(r.number||'ร่างเอกสาร')}<br>วันที่ ${esc(r.date||today())}</div><div class="rule"></div><b>จ่ายให้:</b> ${esc(r.payee)}<br><b>เลขประจำตัว:</b> ${esc(r.taxid||'-')}<br><b>รายการ:</b> ${esc(r.description)}<br><b>หมวดรายจ่าย:</b> ${esc(r.category)}<div class="rule"></div><div>จำนวนเงิน (ตัวเลข)</div><div class="amount">${money(r.amount)} บาท</div><div>จำนวนเงิน (ตัวอักษร)</div><div style="text-align:center">(${bahtText(r.amount)})</div><div class="rule"></div><b>วิธีจ่าย:</b> ${esc(r.method)}<br><b>ธนาคาร:</b> ${esc(r.bank||'-')}<br><b>เลขที่เช็ค:</b> ${esc(r.cheque||'-')}<br><b>สถานะ:</b> ${esc(r.status)}<br><b>หมายเหตุ:</b> ${esc(r.note||'-')}<div class="sign"><div>ลงชื่อ................................<br>ผู้จัดทำ<br>${esc(r.maker||'')}</div><div>ลงชื่อ................................<br>ผู้อนุมัติ<br>${esc(r.approver||'')}</div></div><div class="foot">เอกสารประกอบการดำเนินงานภายในหน่วยงาน<br>โปรดตรวจสอบหลักฐานและอำนาจอนุมัติก่อนจ่ายเงินจริง</div>`}
+function previewDoc(type){let r=formData();if(!r.payee||!r.amount){Swal.fire('ข้อมูลไม่ครบ','กรุณากรอกผู้รับเงินและจำนวนเงิน','warning');return}currentDoc=type;$('printArea').innerHTML=docMarkup(r,type);$('printPanel').classList.remove('hidden');$('printPanel').scrollIntoView({behavior:'smooth'})}
+function printRecord(id,type){let r=records.find(x=>x.id===id);if(!r)return;showTab('new');$('printArea').innerHTML=docMarkup(r,type);$('printPanel').classList.remove('hidden');window.print()}
+async function printBluetooth(){
+ if(!navigator.bluetooth){Swal.fire('ไม่รองรับ','เบราว์เซอร์นี้ไม่มี Web Bluetooth กรุณาใช้ Chrome/Edge ที่รองรับ BLE หรือพิมพ์ผ่านหน้าต่างระบบ','info');return}
+ try{
+  const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['000018f0-0000-1000-8000-00805f9b34fb']});
+  const server=await dev.gatt.connect();
+  const services=await server.getPrimaryServices();let ch=null;
+  for(const s of services){try{for(const c of await s.getCharacteristics())if(c.properties.write||c.properties.writeWithoutResponse){ch=c;break}}catch(e){}if(ch)break}
+  if(!ch)throw new Error('ไม่พบช่องทาง BLE สำหรับส่งข้อมูลพิมพ์ เครื่องอาจใช้ Bluetooth Classic หรือโปรโตคอลเฉพาะ');
+  const txt=$('printArea').innerText.replace(/\n/g,'\r\n')+'\r\n\r\n';
+  const bytes=new TextEncoder().encode(txt);
+  for(let i=0;i<bytes.length;i+=180){let chunk=bytes.slice(i,i+180);if(ch.properties.writeWithoutResponse)await ch.writeValueWithoutResponse(chunk);else await ch.writeValue(chunk)}
+  // ESC/POS partial cut command; จะทำงานเฉพาะรุ่นที่รองรับคำสั่งนี้และมี cutter
+  await ch.writeValue(new Uint8Array([0x1d,0x56,0x00]));
+  Swal.fire('ส่งข้อมูลแล้ว','เครื่องพิมพ์อาจต้องตั้งค่ารหัสภาษาไทย/ESC-POS ให้ตรงรุ่น','success');
+ }catch(e){Swal.fire('เชื่อมต่อหรือพิมพ์ไม่สำเร็จ',e.message,'warning')}
+}
+function cutPaperHint(){Swal.fire('หมายเหตุเรื่องตัดกระดาษ','คำสั่งตัดกระดาษ ESC/POS ใช้ได้เมื่อเครื่องพิมพ์รองรับ cutter และรับคำสั่งผ่าน BLE write เท่านั้น หากใช้ Bluetooth Classic/SPP ต้องใช้แอป/ตัวกลางหรือไดรเวอร์ของผู้ผลิต','info')}
+function saveOrg(){api({action:'settings',org:$('org').value}).then(()=>Swal.fire('บันทึกแล้ว','','success')).catch(e=>Swal.fire('ผิดพลาด',e.message,'error'))}
+$('date').value=today();$('clock').textContent=new Date().toLocaleDateString('th-TH',{dateStyle:'long'});load();
+</script></body></html>
