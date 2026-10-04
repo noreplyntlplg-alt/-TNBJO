@@ -1,0 +1,3669 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>ระบบบัญชีร้านค้าทั่วไป</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, body, body * {
+      font-family: 'Noto Sans Thai', Tahoma, sans-serif !important;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7fb;
+      color: #182230;
+      font-size: 17px;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 10% 10%, #e5edff 0, transparent 35%),
+        radial-gradient(circle at 90% 90%, #e7f3f1 0, transparent 35%),
+        #f5f7fb;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border: 1px solid #e7ebf2;
+      border-radius: 20px;
+      padding: 38px;
+      box-shadow: 0 18px 55px rgba(28, 44, 75, .09);
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 28px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: #244c91;
+      color: white;
+      display: grid;
+      place-items: center;
+    }
+
+    .brand-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .login-title {
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .login-subtitle {
+      color: #8290a3;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+
+    .login-card h2 {
+      font-size: 25px;
+      margin: 0 0 5px;
+    }
+
+    .login-card .muted {
+      color: #8290a3;
+      margin: 0 0 24px;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #39475a;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #dce3ed;
+      background: #fff;
+      border-radius: 10px;
+      padding: 11px 13px;
+      outline: none;
+      color: #182230;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #4777c7;
+      box-shadow: 0 0 0 3px rgba(71, 119, 199, .12);
+    }
+
+    .field textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 9px 15px;
+      font-size: 17px;
+      font-weight: 600;
+      transition: .18s ease;
+      white-space: nowrap;
+    }
+
+    .btn svg {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+    }
+
+    .btn-primary {
+      background: #244c91;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1d3e78;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #34445b;
+      border-color: #dce3ed;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f7fb;
+    }
+
+    .btn-danger {
+      background: #fff1f1;
+      color: #bd3d3d;
+      border-color: #f5d4d4;
+    }
+
+    .btn-success {
+      background: #eaf7ef;
+      color: #237b4b;
+      border-color: #d1eddd;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 252px;
+      flex: 0 0 252px;
+      background: #fff;
+      border-right: 1px solid #e8edf4;
+      display: flex;
+      flex-direction: column;
+      transition: transform .25s ease;
+      z-index: 40;
+    }
+
+    .sidebar-brand {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .sidebar-brand .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+
+    .sidebar-brand-name {
+      font-weight: 700;
+      font-size: 19px;
+      line-height: 1.1;
+    }
+
+    .sidebar-brand-caption {
+      font-size: 14px;
+      color: #8491a3;
+    }
+
+    .sidebar-nav {
+      padding: 17px 12px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      color: #9aa6b6;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 13px 12px 6px;
+      letter-spacing: .2px;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      background: transparent;
+      color: #5e6c80;
+      padding: 10px 12px;
+      border-radius: 9px;
+      text-align: left;
+      margin: 2px 0;
+      font-size: 17px;
+      transition: .18s;
+    }
+
+    .nav-item svg {
+      width: 19px;
+      height: 19px;
+      stroke-width: 1.8;
+      flex: 0 0 auto;
+    }
+
+    .nav-item:hover {
+      background: #f4f7fc;
+      color: #244c91;
+    }
+
+    .nav-item.active {
+      background: #edf3ff;
+      color: #244c91;
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 15px;
+      border-top: 1px solid #edf0f5;
+    }
+
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #eaf0fc;
+      color: #244c91;
+      font-weight: 700;
+    }
+
+    .user-mini-name {
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .user-mini-role {
+      font-size: 14px;
+      color: #8995a6;
+    }
+
+    .main-area {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 76px;
+      background: rgba(255,255,255,.95);
+      border-bottom: 1px solid #e8edf4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .topbar-title {
+      font-size: 23px;
+      font-weight: 700;
+    }
+
+    .topbar-date {
+      color: #8995a6;
+      font-size: 15px;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      border: 1px solid #e5eaf1;
+      border-radius: 9px;
+      background: #fff;
+      color: #617087;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .content {
+      padding: 27px 30px 40px;
+      width: 100%;
+      max-width: 1500px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading h1 {
+      font-size: 27px;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    .page-heading p {
+      margin: 5px 0 0;
+      color: #8793a5;
+      font-size: 16px;
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e8edf4;
+      border-radius: 13px;
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #7d8a9d;
+      font-size: 16px;
+    }
+
+    .stat-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: #edf3ff;
+      color: #315fa9;
+    }
+
+    .stat-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .stat-value {
+      font-size: 29px;
+      font-weight: 700;
+      margin-top: 9px;
+      line-height: 1.2;
+      color: #1d2a3c;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-caption {
+      color: #a0aaba;
+      font-size: 14px;
+      margin-top: 3px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #e8edf4;
+      border-radius: 13px;
+      padding: 19px;
+      min-width: 0;
+      margin-bottom: 18px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .panel-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .panel-subtitle {
+      color: #94a0b0;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 15px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      min-height: 39px;
+      border: 1px solid #dfe5ee;
+      background: #fff;
+      border-radius: 9px;
+      padding: 7px 11px;
+      outline: none;
+      color: #39475a;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      border-color: #4777c7;
+    }
+
+    .toolbar .search-input {
+      min-width: 210px;
+      flex: 1;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid #edf0f5;
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    thead {
+      background: #f7f9fc;
+    }
+
+    th {
+      font-weight: 700;
+      color: #65748a;
+      text-align: left;
+      padding: 11px 13px;
+      border-bottom: 1px solid #e9edf3;
+    }
+
+    td {
+      padding: 10px 13px;
+      border-bottom: 1px solid #f0f2f6;
+      color: #3d4b5e;
+    }
+
+    tbody tr:hover {
+      background: #fafbfd;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .muted {
+      color: #8995a6;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 14px;
+      font-weight: 600;
+      background: #f0f3f8;
+      color: #69778b;
+    }
+
+    .badge-success {
+      background: #e9f7ef;
+      color: #277a4c;
+    }
+
+    .badge-danger {
+      background: #fff0f0;
+      color: #b93b3b;
+    }
+
+    .badge-warning {
+      background: #fff5df;
+      color: #9c6c12;
+    }
+
+    .badge-info {
+      background: #edf3ff;
+      color: #315fa9;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .table-action {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      color: #738197;
+    }
+
+    .table-action:hover {
+      background: #f0f4fa;
+      color: #244c91;
+    }
+
+    .table-action.danger:hover {
+      color: #b93b3b;
+      background: #fff0f0;
+    }
+
+    .table-action svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 42px 15px;
+      color: #9aa6b6;
+    }
+
+    .empty-state svg {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 8px;
+      stroke-width: 1.5;
+    }
+
+    .empty-state-title {
+      color: #637187;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .empty-state p {
+      margin: 3px 0 0;
+      font-size: 15px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 13px;
+      color: #8793a5;
+      font-size: 15px;
+    }
+
+    .pagination-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pagination-actions button {
+      border: 1px solid #e1e7ef;
+      background: #fff;
+      border-radius: 7px;
+      padding: 5px 10px;
+      color: #5e6c80;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(20, 31, 48, .42);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      animation: fadeIn .16s ease;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 650px;
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(14, 28, 51, .2);
+      animation: modalIn .2s ease;
+    }
+
+    .modal-large {
+      max-width: 900px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 19px 23px;
+      border-bottom: 1px solid #edf0f5;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .modal-body {
+      padding: 22px 23px;
+    }
+
+    .modal-footer {
+      padding: 15px 23px;
+      border-top: 1px solid #edf0f5;
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 15px;
+    }
+
+    .form-grid .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .toast-container {
+      position: fixed;
+      right: 22px;
+      top: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      width: min(360px, calc(100vw - 40px));
+    }
+
+    .toast {
+      background: #fff;
+      border: 1px solid #e8edf4;
+      border-left: 4px solid #4777c7;
+      border-radius: 10px;
+      padding: 13px 15px;
+      box-shadow: 0 10px 35px rgba(25, 42, 70, .12);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: toastIn .2s ease;
+    }
+
+    .toast.success {
+      border-left-color: #27945a;
+    }
+
+    .toast.error {
+      border-left-color: #d34b4b;
+    }
+
+    .toast.warning {
+      border-left-color: #d99a24;
+    }
+
+    .toast-icon svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .toast-message {
+      color: #39475a;
+      line-height: 1.3;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(247, 249, 252, .75);
+      backdrop-filter: blur(2px);
+    }
+
+    .loading-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid #e8edf4;
+      border-radius: 12px;
+      padding: 16px 21px;
+      box-shadow: 0 10px 30px rgba(25, 42, 70, .08);
+      color: #526176;
+    }
+
+    .spinner {
+      width: 21px;
+      height: 21px;
+      border: 2px solid #dbe5f4;
+      border-top-color: #315fa9;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    .notice {
+      border: 1px solid #e3eaf6;
+      background: #f4f7fc;
+      color: #536b8d;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+
+    .notice.warning {
+      border-color: #f1e2bd;
+      background: #fff9e9;
+      color: #8a681d;
+    }
+
+    .notice.error {
+      border-color: #f1d4d4;
+      background: #fff4f4;
+      color: #a43c3c;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #edf0f5;
+      padding: 11px 0;
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: #7b899c;
+    }
+
+    .summary-value {
+      font-weight: 700;
+      color: #25364d;
+    }
+
+    .report-total {
+      background: #f7f9fc;
+      font-weight: 700;
+    }
+
+    .journal-line {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr .75fr .75fr 36px;
+      gap: 7px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .journal-line input,
+    .journal-line select {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px solid #dce3ed;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .journal-total {
+      display: flex;
+      justify-content: flex-end;
+      gap: 22px;
+      padding: 12px 0;
+      border-top: 1px solid #e9edf3;
+      font-weight: 700;
+    }
+
+    .settings-section {
+      max-width: 750px;
+    }
+
+    .settings-section h3 {
+      font-size: 20px;
+      margin: 0 0 16px;
+    }
+
+    .mobile-overlay {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(9px) scale(.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        transform: translateX(-100%);
+        box-shadow: 12px 0 35px rgba(20, 31, 48, .12);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-overlay.show {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        background: rgba(20, 31, 48, .35);
+      }
+
+      .topbar {
+        height: 64px;
+        padding: 0 14px;
+      }
+
+      .content {
+        padding: 20px 14px 30px;
+      }
+
+      .topbar-title {
+        font-size: 20px;
+      }
+
+      .topbar-date {
+        display: none;
+      }
+
+      .page-heading {
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 13px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid .field.full {
+        grid-column: auto;
+      }
+
+      .modal-backdrop {
+        padding: 8px;
+        align-items: flex-end;
+      }
+
+      .modal {
+        max-height: 92vh;
+        border-radius: 16px 16px 10px 10px;
+      }
+
+      .journal-line {
+        grid-template-columns: 1fr 1fr;
+        padding: 10px;
+        border: 1px solid #edf0f5;
+        border-radius: 9px;
+      }
+
+      .journal-line button {
+        grid-column: 2;
+        justify-self: end;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat-value {
+        font-size: 21px;
+      }
+
+      .login-card {
+        padding: 25px;
+      }
+
+      .page-actions {
+        width: 100%;
+      }
+
+      .page-actions .btn {
+        flex: 1;
+      }
+    }
+
+    @media print {
+      .sidebar,
+      .topbar,
+      .page-actions,
+      .toolbar,
+      .table-actions,
+      .pagination,
+      .no-print {
+        display: none !important;
+      }
+
+      body,
+      .main-area,
+      .content {
+        background: #fff !important;
+        padding: 0 !important;
+      }
+
+      .panel,
+      .stat-card {
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      table {
+        white-space: normal;
+      }
+
+      body,
+      table,
+      th,
+      td {
+        font-family: 'Noto Sans Thai', Tahoma, sans-serif !important;
+      }
+    }
+  </style>
+
+  <?!= include('style'); ?>
+</head>
+
+<body>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <span id="loadingText">กำลังดำเนินการ...</span>
+    </div>
+  </div>
+
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+
+      <div class="login-brand">
+        <div class="brand-icon" id="loginBrandIcon"></div>
+        <div>
+          <div class="login-title">บัญชีร้านค้า</div>
+          <div class="login-subtitle">ระบบบัญชีร้านค้าทั่วไป</div>
+        </div>
+      </div>
+
+      <h2>เข้าสู่ระบบ</h2>
+      <p class="muted">กรุณาเข้าสู่ระบบเพื่อจัดการข้อมูลบัญชี</p>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginUsername">ชื่อผู้ใช้</label>
+          <input id="loginUsername" name="username"
+                 autocomplete="username" required>
+        </div>
+
+        <div class="field">
+          <label for="loginPassword">รหัสผ่าน</label>
+          <input id="loginPassword" name="password"
+                 type="password" autocomplete="current-password" required>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">
+          <span id="loginButtonIcon"></span>
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <div class="login-subtitle" style="margin-top:22px;text-align:center">
+        ระบบจัดเก็บข้อมูลผ่าน Google Sheets
+      </div>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell hidden">
+
+    <div id="mobileOverlay" class="mobile-overlay"
+         onclick="toggleSidebar(false)"></div>
+
+    <aside id="sidebar" class="sidebar">
+
+      <div class="sidebar-brand">
+        <div class="brand-icon" id="sidebarBrandIcon"></div>
+        <div>
+          <div class="sidebar-brand-name">บัญชีร้านค้า</div>
+          <div class="sidebar-brand-caption">ระบบจัดการภายใน</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <div class="nav-section">ภาพรวม</div>
+
+        <button class="nav-item active" data-page="dashboard">
+          <span data-icon="dashboard"></span>
+          <span>แดชบอร์ด</span>
+        </button>
+
+        <div class="nav-section">ข้อมูลหลัก</div>
+
+        <button class="nav-item" data-page="products">
+          <span data-icon="package"></span>
+          <span>สินค้าและคลังสินค้า</span>
+        </button>
+
+        <button class="nav-item" data-page="customers">
+          <span data-icon="users"></span>
+          <span>ข้อมูลลูกค้า</span>
+        </button>
+
+        <button class="nav-item" data-page="suppliers">
+          <span data-icon="truck"></span>
+          <span>ข้อมูลผู้จำหน่าย</span>
+        </button>
+
+        <div class="nav-section">การเงิน</div>
+
+        <button class="nav-item" data-page="transactions">
+          <span data-icon="arrow-left-right"></span>
+          <span>รายรับ - รายจ่าย</span>
+        </button>
+
+        <button class="nav-item" data-page="receipts">
+          <span data-icon="receipt"></span>
+          <span>บันทึกรับเงิน</span>
+        </button>
+
+        <button class="nav-item" data-page="payments">
+          <span data-icon="wallet"></span>
+          <span>บันทึกจ่ายเงิน</span>
+        </button>
+
+        <button class="nav-item" data-page="disbursements">
+          <span data-icon="file"></span>
+          <span>ใบสั่งจ่าย / ใบเบิกเงิน</span>
+        </button>
+
+        <button class="nav-item" data-page="journals">
+          <span data-icon="book-open"></span>
+          <span>สมุดรายวัน</span>
+        </button>
+
+        <div class="nav-section">รายงาน</div>
+
+        <button class="nav-item" data-page="reports">
+          <span data-icon="chart"></span>
+          <span>รายงานทางบัญชี</span>
+        </button>
+
+        <div class="nav-section admin-only">ระบบ</div>
+
+        <button class="nav-item admin-only" data-page="users">
+          <span data-icon="user-cog"></span>
+          <span>จัดการผู้ใช้งาน</span>
+        </button>
+
+        <button class="nav-item admin-only" data-page="audit">
+          <span data-icon="history"></span>
+          <span>ประวัติการใช้งาน</span>
+        </button>
+
+        <button class="nav-item admin-only" data-page="settings">
+          <span data-icon="settings"></span>
+          <span>ตั้งค่าระบบ</span>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <div class="avatar" id="userAvatar">U</div>
+          <div>
+            <div class="user-mini-name" id="sidebarUserName">ผู้ใช้งาน</div>
+            <div class="user-mini-role" id="sidebarUserRole">ผู้ใช้งาน</div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary btn-block"
+                style="margin-top:9px"
+                onclick="openPasswordModal()">
+          <span data-icon="key"></span>
+          เปลี่ยนรหัสผ่าน
+        </button>
+
+        <button class="btn btn-secondary btn-block"
+                style="margin-top:7px"
+                onclick="logout()">
+          <span data-icon="log-out"></span>
+          ออกจากระบบ
+        </button>
+      </div>
+
+    </aside>
+
+    <main class="main-area">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button" onclick="toggleSidebar()"
+                  aria-label="เปิดเมนู">
+            <span data-icon="menu"></span>
+          </button>
+          <div>
+            <div class="topbar-title" id="topbarTitle">แดชบอร์ด</div>
+            <div class="topbar-date" id="topbarDate"></div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-button" onclick="refreshCurrentPage()"
+                  title="รีเฟรชข้อมูล">
+            <span data-icon="refresh"></span>
+          </button>
+        </div>
+      </header>
+
+      <section id="pageContent" class="content"></section>
+
+    </main>
+  </div>
+
+  <div id="modalRoot"></div>
+
+  <script>
+    'use strict';
+
+    const AppState = {
+      token: null,
+      user: null,
+      settings: {},
+      accounts: [],
+      currentPage: 'dashboard',
+      pageData: [],
+      page: 1,
+      pageSize: 100,
+      search: '',
+      report: null,
+      loading: false
+    };
+
+    const PAGE_TITLES = {
+      dashboard: 'แดชบอร์ด',
+      products: 'สินค้าและคลังสินค้า',
+      customers: 'ข้อมูลลูกค้า',
+      suppliers: 'ข้อมูลผู้จำหน่าย',
+      transactions: 'รายรับ - รายจ่าย',
+      receipts: 'บันทึกรับเงิน',
+      payments: 'บันทึกจ่ายเงิน',
+      disbursements: 'ใบสั่งจ่าย / ใบเบิกเงิน',
+      journals: 'สมุดรายวัน',
+      reports: 'รายงานทางบัญชี',
+      users: 'จัดการผู้ใช้งาน',
+      audit: 'ประวัติการใช้งาน',
+      settings: 'ตั้งค่าระบบ'
+    };
+
+    const ICONS = {
+      dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+      package: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+      users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+      truck: '<path d="M3 6h12v12H3z"/><path d="M15 10h4l3 3v5h-7z"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="18.5" cy="19" r="1.5"/>',
+      'arrow-left-right': '<path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/>',
+      receipt: '<path d="M4 3h16v18l-4-2-4 2-4-2-4 2V3Z"/><path d="M8 8h8M8 12h8M8 16h4"/>',
+      wallet: '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h18"/><path d="M16 14h2"/>',
+      'book-open': '<path d="M12 7v14"/><path d="M3 18V5a2 2 0 0 1 2-2h4a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v13"/><path d="M3 18h6a3 3 0 0 1 3 3 3 3 0 0 1 3-3h6"/>',
+      chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M19 9h-5V4"/>',
+      'user-cog': '<circle cx="9" cy="8" r="4"/><path d="M3 21v-2a6 6 0 0 1 12 0v2"/><path d="M19 8v4M17 10h4"/><path d="m18 16 1 1 2-2"/>',
+      history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
+      settings: '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.7Z"/>',
+      key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9 2 2-3 3 2 2-3 3-2-2-3 3"/>',
+      'log-out': '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>',
+      menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+      refresh: '<path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12"/><path d="M18.4 15a7 7 0 0 1-11.6 2L4 12"/>',
+      plus: '<path d="M12 5v14M5 12h14"/>',
+      search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+      edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+      trash: '<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6"/><path d="M10 11v6M14 11v6"/>',
+      printer: '<path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/>',
+      close: '<path d="m18 6-12 12M6 6l12 12"/>',
+      check: '<path d="m5 12 4 4L19 6"/>',
+      alert: '<path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+      file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+      calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+      bank: '<path d="m3 10 9-7 9 7"/><path d="M4 10h16M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/>',
+      box: '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/>',
+      eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+      minus: '<path d="M5 12h14"/>',
+      lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+    };
+
+    function icon(name, size = 20) {
+      const content = ICONS[name] || ICONS.file;
+
+      return `
+        <svg width="${size}" height="${size}" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          ${content}
+        </svg>`;
+    }
+
+    function applyIcons() {
+      document.querySelectorAll('[data-icon]').forEach(function(el) {
+        el.innerHTML = icon(el.getAttribute('data-icon'));
+      });
+
+      document.getElementById('loginBrandIcon').innerHTML = icon('bank', 25);
+      document.getElementById('sidebarBrandIcon').innerHTML = icon('bank', 23);
+      document.getElementById('loginButtonIcon').innerHTML = icon('lock', 17);
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString('th-TH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function dateText(value) {
+      if (!value) return '-';
+
+      const d = new Date(value);
+
+      if (isNaN(d.getTime())) {
+        return escapeHtml(value);
+      }
+
+      return d.toLocaleDateString('th-TH', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function todayInput() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function firstDayInput() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    }
+
+    function showLoading(message = 'กำลังดำเนินการ...') {
+      AppState.loading = true;
+      document.getElementById('loadingText').textContent = message;
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      AppState.loading = false;
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    function toast(message, type = 'success') {
+      const root = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+
+      const iconName = type === 'error' ? 'alert' :
+        type === 'warning' ? 'alert' : 'check';
+
+      el.innerHTML = `
+        <div class="toast-icon">${icon(iconName, 19)}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
+      `;
+
+      root.appendChild(el);
+
+      setTimeout(function() {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(10px)';
+        setTimeout(() => el.remove(), 250);
+      }, 3500);
+    }
+
+    function rpc(functionName, ...args) {
+      return new Promise(function(resolve, reject) {
+        if (!google || !google.script || !google.script.run) {
+          reject(new Error('ไม่พบการเชื่อมต่อ Google Apps Script'));
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(function(error) {
+            reject(new Error(error && error.message
+              ? error.message
+              : 'เกิดข้อผิดพลาดในการเชื่อมต่อ'));
+          })[functionName](...args);
+      });
+    }
+
+    async function callApi(functionName, ...args) {
+      showLoading();
+
+      try {
+        const result = await rpc(functionName, ...args);
+
+        if (result && result.success === false) {
+          throw new Error(result.message || 'ไม่สามารถดำเนินการได้');
+        }
+
+        return result;
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function login(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        showLoading('กำลังตรวจสอบข้อมูลเข้าสู่ระบบ...');
+
+        const result = await rpc('apiLogin', username, password);
+
+        hideLoading();
+
+        if (!result || !result.success) {
+          toast(result && result.message
+            ? result.message
+            : 'เข้าสู่ระบบไม่สำเร็จ', 'error');
+          return;
+        }
+
+        AppState.token = result.token;
+        AppState.user = result.user;
+
+        await initializeApp();
+
+      } catch (error) {
+        hideLoading();
+        toast(error.message, 'error');
+      }
+    }
+
+    async function initializeApp() {
+      try {
+        showLoading('กำลังโหลดข้อมูลระบบ...');
+
+        const result = await rpc('apiGetBootstrap', AppState.token);
+
+        AppState.settings = result.settings || {};
+        AppState.accounts = result.accounts || [];
+
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appShell').classList.remove('hidden');
+
+        document.getElementById('sidebarUserName').textContent =
+          AppState.user.name || AppState.user.username;
+
+        document.getElementById('sidebarUserRole').textContent =
+          roleText(AppState.user.role);
+
+        document.getElementById('userAvatar').textContent =
+          (AppState.user.name || 'U').substring(0, 1);
+
+        if (AppState.user.role !== 'Admin') {
+          document.querySelectorAll('.admin-only').forEach(function(el) {
+            el.classList.add('hidden');
+          });
+        }
+
+        document.getElementById('topbarDate').textContent =
+          new Date().toLocaleDateString('th-TH', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
+
+        await navigate('dashboard');
+
+      } catch (error) {
+        toast(error.message, 'error');
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appShell').classList.add('hidden');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function roleText(role) {
+      return {
+        Admin: 'ผู้ดูแลระบบ',
+        Staff: 'เจ้าหน้าที่',
+        Viewer: 'ผู้ดูข้อมูล'
+      }[role] || role || 'ผู้ใช้งาน';
+    }
+
+    async function logout() {
+      const confirmed = await confirmDialog(
+        'ออกจากระบบ',
+        'คุณต้องการออกจากระบบใช่หรือไม่'
+      );
+
+      if (!confirmed) return;
+
+      try {
+        if (AppState.token) {
+          await rpc('apiLogout', AppState.token);
+        }
+      } catch (e) {
+        // ล้างสถานะฝั่งหน้าเว็บต่อ แม้คำขอออกจากระบบล้มเหลว
+      }
+
+      AppState.token = null;
+      AppState.user = null;
+      AppState.settings = {};
+      AppState.accounts = [];
+
+      document.getElementById('appShell').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function toggleSidebar(force) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+
+      const open = typeof force === 'boolean'
+        ? force
+        : !sidebar.classList.contains('open');
+
+      sidebar.classList.toggle('open', open);
+      overlay.classList.toggle('show', open);
+    }
+
+    async function navigate(page) {
+      if (!PAGE_TITLES[page]) return;
+
+      AppState.currentPage = page;
+      AppState.page = 1;
+      AppState.search = '';
+
+      document.querySelectorAll('.nav-item').forEach(function(button) {
+        button.classList.toggle(
+          'active',
+          button.dataset.page === page
+        );
+      });
+
+      document.getElementById('topbarTitle').textContent =
+        PAGE_TITLES[page];
+
+      toggleSidebar(false);
+
+      await renderPage(page);
+    }
+
+    async function refreshCurrentPage() {
+      await renderPage(AppState.currentPage);
+      toast('โหลดข้อมูลล่าสุดแล้ว');
+    }
+
+    async function renderPage(page) {
+      const root = document.getElementById('pageContent');
+
+      root.innerHTML = `
+        <div class="panel">
+          <div class="loading-card">
+            <div class="spinner"></div>
+            กำลังโหลดข้อมูล...
+          </div>
+        </div>
+      `;
+
+      try {
+        switch (page) {
+          case 'dashboard':
+            await renderDashboard();
+            break;
+          case 'products':
+            await renderEntityPage('Products');
+            break;
+          case 'customers':
+            await renderEntityPage('Customers');
+            break;
+          case 'suppliers':
+            await renderEntityPage('Suppliers');
+            break;
+          case 'transactions':
+            await renderEntityPage('Transactions');
+            break;
+          case 'receipts':
+            await renderEntityPage('Receipts');
+            break;
+          case 'payments':
+            await renderEntityPage('Payments');
+            break;
+          case 'disbursements':
+            await renderDisbursements();
+            break;
+          case 'journals':
+            await renderJournals();
+            break;
+          case 'reports':
+            renderReports();
+            break;
+          case 'users':
+            await renderUsers();
+            break;
+          case 'audit':
+            await renderAudit();
+            break;
+          case 'settings':
+            renderSettings();
+            break;
+        }
+      } catch (error) {
+        root.innerHTML = `
+          <div class="notice error">
+            ${icon('alert', 18)}
+            ${escapeHtml(error.message)}
+          </div>
+        `;
+        toast(error.message, 'error');
+      }
+    }
+
+    function pageHeading(title, subtitle, action = '') {
+      return `
+        <div class="page-heading">
+          <div>
+            <h1>${title}</h1>
+            <p>${subtitle}</p>
+          </div>
+          <div class="page-actions">${action}</div>
+        </div>
+      `;
+    }
+
+    function statCard(label, value, iconName, caption = '') {
+      return `
+        <div class="stat-card">
+          <div class="stat-top">
+            <span>${label}</span>
+            <span class="stat-icon">${icon(iconName, 18)}</span>
+          </div>
+          <div class="stat-value">${value}</div>
+          <div class="stat-caption">${caption}</div>
+        </div>
+      `;
+    }
+
+    async function renderDashboard() {
+      const data = await callApi('apiGetDashboard', AppState.token, {
+        startDate: firstDayInput(),
+        endDate: todayInput()
+      });
+
+      const s = data.summary || {};
+
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading(
+          'ภาพรวมกิจการ',
+          'สรุปข้อมูลจากรายการที่บันทึกในระบบ'
+        )}
+
+        <div class="stats-grid">
+          ${statCard('รายรับในช่วงที่เลือก', money(s.income) + ' บาท', 'chart', 'จากรายการรายรับ')}
+          ${statCard('รายจ่ายในช่วงที่เลือก', money(s.expense) + ' บาท', 'wallet', 'จากรายการรายจ่าย')}
+          ${statCard('รายรับสุทธิ', money(s.net) + ' บาท', 'bank', 'รายรับหักรายจ่าย')}
+          ${statCard('มูลค่าสินค้าคงเหลือ', money(s.stockValue) + ' บาท', 'package', 'คำนวณจากต้นทุนสินค้า')}
+          ${statCard('จำนวนสินค้า', Number(s.productCount || 0).toLocaleString('th-TH'), 'box', 'รายการสินค้าที่ใช้งาน')}
+          ${statCard('สินค้าใกล้หมด', Number(s.lowStockCount || 0).toLocaleString('th-TH'), 'alert', 'ตามจุดแจ้งเตือนที่กำหนด')}
+          ${statCard('ลูกค้า', Number(s.customerCount || 0).toLocaleString('th-TH'), 'users', 'ข้อมูลลูกค้าที่ใช้งาน')}
+          ${statCard('ผู้จำหน่าย', Number(s.supplierCount || 0).toLocaleString('th-TH'), 'truck', 'ข้อมูลผู้จำหน่ายที่ใช้งาน')}
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">รายการล่าสุด</div>
+                <div class="panel-subtitle">รายการรายรับและรายจ่ายที่บันทึกไว้</div>
+              </div>
+              <button class="btn btn-secondary"
+                      onclick="navigate('transactions')">ดูทั้งหมด</button>
+            </div>
+            ${renderTransactionTable(data.recentTransactions || [])}
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">สินค้าใกล้หมด</div>
+                <div class="panel-subtitle">ตรวจสอบจำนวนสินค้าคงเหลือ</div>
+              </div>
+            </div>
+            ${renderLowStock(data.lowStockProducts || [])}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTransactionTable(rows) {
+      if (!rows.length) {
+        return emptyState('ยังไม่มีรายการรายรับรายจ่าย');
+      }
+
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>วันที่</th>
+                <th>ประเภท</th>
+                <th>รายละเอียด</th>
+                <th class="text-right">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(r) {
+                return `
+                  <tr>
+                    <td>${dateText(r.date)}</td>
+                    <td>
+                      <span class="badge ${r.type === 'Income' ? 'badge-success' : 'badge-warning'}">
+                        ${r.type === 'Income' ? 'รายรับ' : 'รายจ่าย'}
+                      </span>
+                    </td>
+                    <td>${escapeHtml(r.description || '-')}</td>
+                    <td class="text-right">${money(r.amount)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderLowStock(rows) {
+      if (!rows.length) {
+        return emptyState('ไม่มีสินค้าใกล้หมด');
+      }
+
+      return `
+        <div>
+          ${rows.map(function(p) {
+            return `
+              <div class="summary-row">
+                <div>
+                  <div style="font-weight:700">${escapeHtml(p.name)}</div>
+                  <div class="muted">${escapeHtml(p.code || '')}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="summary-value">${Number(p.quantity || 0)} ${escapeHtml(p.unit || '')}</div>
+                  <span class="badge badge-warning">ใกล้หมด</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function emptyState(message, detail = 'ข้อมูลจะแสดงเมื่อมีรายการบันทึก') {
+      return `
+        <div class="empty-state">
+          ${icon('file', 34)}
+          <div class="empty-state-title">${escapeHtml(message)}</div>
+          <p>${escapeHtml(detail)}</p>
+        </div>
+      `;
+    }
+
+    const ENTITY_CONFIG = {
+      Products: {
+        title: 'สินค้า',
+        description: 'จัดการสินค้า ราคา และจำนวนคงเหลือ',
+        fields: [
+          ['code', 'รหัสสินค้า', 'text'],
+          ['name', 'ชื่อสินค้า', 'text', true],
+          ['category', 'หมวดหมู่', 'text'],
+          ['unit', 'หน่วยนับ', 'text'],
+          ['costPrice', 'ราคาทุน', 'number'],
+          ['sellPrice', 'ราคาขาย', 'number'],
+          ['quantity', 'จำนวนคงเหลือ', 'number'],
+          ['minQuantity', 'จุดแจ้งเตือนสินค้าใกล้หมด', 'number']
+        ],
+        columns: [
+          ['code', 'รหัสสินค้า'],
+          ['name', 'ชื่อสินค้า'],
+          ['category', 'หมวดหมู่'],
+          ['quantity', 'คงเหลือ'],
+          ['costPrice', 'ราคาทุน'],
+          ['sellPrice', 'ราคาขาย'],
+          ['status', 'สถานะ']
+        ]
+      },
+
+      Customers: {
+        title: 'ลูกค้า',
+        description: 'ข้อมูลลูกค้าและช่องทางติดต่อ',
+        fields: [
+          ['code', 'รหัสลูกค้า', 'text'],
+          ['name', 'ชื่อลูกค้า', 'text', true],
+          ['phone', 'โทรศัพท์', 'text'],
+          ['email', 'อีเมล', 'email'],
+          ['taxId', 'เลขประจำตัวผู้เสียภาษี', 'text'],
+          ['address', 'ที่อยู่', 'textarea'],
+          ['note', 'หมายเหตุ', 'textarea']
+        ],
+        columns: [
+          ['code', 'รหัสลูกค้า'],
+          ['name', 'ชื่อลูกค้า'],
+          ['phone', 'โทรศัพท์'],
+          ['taxId', 'เลขผู้เสียภาษี'],
+          ['status', 'สถานะ']
+        ]
+      },
+
+      Suppliers: {
+        title: 'ผู้จำหน่าย',
+        description: 'ข้อมูลผู้จำหน่ายและคู่ค้าของร้าน',
+        fields: [
+          ['code', 'รหัสผู้จำหน่าย', 'text'],
+          ['name', 'ชื่อผู้จำหน่าย', 'text', true],
+          ['phone', 'โทรศัพท์', 'text'],
+          ['email', 'อีเมล', 'email'],
+          ['taxId', 'เลขประจำตัวผู้เสียภาษี', 'text'],
+          ['address', 'ที่อยู่', 'textarea'],
+          ['note', 'หมายเหตุ', 'textarea']
+        ],
+        columns: [
+          ['code', 'รหัสผู้จำหน่าย'],
+          ['name', 'ชื่อผู้จำหน่าย'],
+          ['phone', 'โทรศัพท์'],
+          ['taxId', 'เลขผู้เสียภาษี'],
+          ['status', 'สถานะ']
+        ]
+      },
+
+      Transactions: {
+        title: 'รายรับ - รายจ่าย',
+        description: 'บันทึกรายรับและรายจ่ายทั่วไป',
+        fields: [
+          ['date', 'วันที่', 'date', true],
+          ['type', 'ประเภท', 'select', true, [
+            ['Income', 'รายรับ'],
+            ['Expense', 'รายจ่าย']
+          ]],
+          ['category', 'หมวดหมู่', 'text'],
+          ['description', 'รายละเอียด', 'text', true],
+          ['amount', 'จำนวนเงิน', 'number', true],
+          ['paymentMethod', 'ช่องทางชำระเงิน', 'select', false, [
+            ['Cash', 'เงินสด'],
+            ['Bank', 'เงินโอน / ธนาคาร'],
+            ['Other', 'อื่น ๆ']
+          ]],
+          ['reference', 'เลขอ้างอิง', 'text']
+        ],
+        columns: [
+          ['documentNo', 'เลขที่เอกสาร'],
+          ['date', 'วันที่'],
+          ['type', 'ประเภท'],
+          ['category', 'หมวดหมู่'],
+          ['description', 'รายละเอียด'],
+          ['amount', 'จำนวนเงิน'],
+          ['status', 'สถานะ']
+        ]
+      },
+
+      Receipts: {
+        title: 'รับเงิน',
+        description: 'บันทึกรายการรับเงิน',
+        fields: [
+          ['date', 'วันที่รับเงิน', 'date', true],
+          ['customerId', 'รหัสลูกค้า', 'text'],
+          ['description', 'รายละเอียด', 'text', true],
+          ['amount', 'จำนวนเงิน', 'number', true],
+          ['paymentMethod', 'ช่องทางรับเงิน', 'select', false, [
+            ['Cash', 'เงินสด'],
+            ['Bank', 'เงินโอน / ธนาคาร'],
+            ['Other', 'อื่น ๆ']
+          ]],
+          ['reference', 'เลขอ้างอิง', 'text']
+        ],
+        columns: [
+          ['documentNo', 'เลขที่ใบรับเงิน'],
+          ['date', 'วันที่'],
+          ['customerId', 'รหัสลูกค้า'],
+          ['description', 'รายละเอียด'],
+          ['amount', 'จำนวนเงิน'],
+          ['status', 'สถานะ']
+        ]
+      },
+
+      Payments: {
+        title: 'จ่ายเงิน',
+        description: 'บันทึกรายการจ่ายเงิน',
+        fields: [
+          ['date', 'วันที่จ่ายเงิน', 'date', true],
+          ['supplierId', 'รหัสผู้จำหน่าย', 'text'],
+          ['description', 'รายละเอียด', 'text', true],
+          ['amount', 'จำนวนเงิน', 'number', true],
+          ['paymentMethod', 'ช่องทางจ่ายเงิน', 'select', false, [
+            ['Cash', 'เงินสด'],
+            ['Bank', 'เงินโอน / ธนาคาร'],
+            ['Other', 'อื่น ๆ']
+          ]],
+          ['reference', 'เลขอ้างอิง', 'text']
+        ],
+        columns: [
+          ['documentNo', 'เลขที่ใบจ่ายเงิน'],
+          ['date', 'วันที่'],
+          ['supplierId', 'รหัสผู้จำหน่าย'],
+          ['description', 'รายละเอียด'],
+          ['amount', 'จำนวนเงิน'],
+          ['status', 'สถานะ']
+        ]
+      }
+    };
+
+    async function renderEntityPage(entity) {
+      const config = ENTITY_CONFIG[entity];
+
+      const result = await callApi('apiList', AppState.token, entity, {
+        page: AppState.page,
+        pageSize: AppState.pageSize,
+        search: AppState.search,
+        status: 'Active'
+      });
+
+      AppState.pageData = result.data || [];
+
+      const root = document.getElementById('pageContent');
+
+      const action = `
+        <button class="btn btn-primary" onclick="openEntityForm('${entity}')">
+          ${icon('plus', 17)}
+          เพิ่ม${config.title}
+        </button>
+      `;
+
+      root.innerHTML = `
+        ${pageHeading(config.title, config.description, action)}
+
+        <div class="panel">
+          <div class="toolbar">
+            <input class="search-input"
+                   id="entitySearch"
+                   placeholder="ค้นหาข้อมูล..."
+                   value="${escapeHtml(AppState.search)}"
+                   onkeydown="if(event.key==='Enter') searchEntity('${entity}')">
+            <button class="btn btn-secondary"
+                    onclick="searchEntity('${entity}')">
+              ${icon('search', 16)}
+              ค้นหา
+            </button>
+            <button class="btn btn-secondary"
+                    onclick="clearEntitySearch('${entity}')">ล้าง</button>
+          </div>
+
+          ${renderEntityTable(entity, AppState.pageData)}
+
+          ${renderPagination(result.total || 0, result.page || 1,
+            result.pageSize || AppState.pageSize, entity)}
+        </div>
+      `;
+    }
+
+    function renderEntityTable(entity, rows) {
+      const config = ENTITY_CONFIG[entity];
+
+      if (!rows.length) {
+        return emptyState('ไม่พบข้อมูล', 'ลองเปลี่ยนคำค้นหาหรือเพิ่มรายการใหม่');
+      }
+
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                ${config.columns.map(function(c) {
+                  return `<th>${c[1]}</th>`;
+                }).join('')}
+                <th class="text-right">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(function(row) {
+                return `
+                  <tr>
+                    ${config.columns.map(function(c) {
+                      return `<td>${formatCell(c[0], row[c[0]])}</td>`;
+                    }).join('')}
+                    <td>
+                      <div class="table-actions">
+                        ${entity === 'Products'
+                          ? `<button class="table-action" title="ปรับสต็อก"
+                               onclick="openStockModal('${row.id}')">${icon('package', 16)}</button>`
+                          : ''}
+                        <button class="table-action" title="แก้ไข"
+                                onclick="editEntity('${entity}','${row.id}')">
+                          ${icon('edit', 16)}
+                        </button>
+                        <button class="table-action danger" title="ยกเลิก"
+                                onclick="deleteEntity('${entity}','${row.id}')">
+                          ${icon('trash', 16)}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function formatCell(key, value) {
+      if (key === 'amount' || key === 'costPrice' || key === 'sellPrice') {
+        return money(value);
+      }
+
+      if (key === 'date' || key === 'createdAt') {
+        return dateText(value);
+      }
+
+      if (key === 'type') {
+        return value === 'Income'
+          ? '<span class="badge badge-success">รายรับ</span>'
+          : '<span class="badge badge-warning">รายจ่าย</span>';
+      }
+
+      if (key === 'status') {
+        if (value === 'Active') {
+          return '<span class="badge badge-success">ใช้งาน</span>';
+        }
+        if (value === 'Deleted') {
+          return '<span class="badge badge-danger">ยกเลิก</span>';
+        }
+        return `<span class="badge">${escapeHtml(value || '-')}</span>`;
+      }
+
+      return escapeHtml(value === '' || value == null ? '-' : value);
+    }
+
+    function renderPagination(total, page, pageSize, entity) {
+      const pages = Math.max(1, Math.ceil(total / pageSize));
+
+      return `
+        <div class="pagination">
+          <span>ทั้งหมด ${Number(total).toLocaleString('th-TH')} รายการ</span>
+          <div class="pagination-actions">
+            <button ${page <= 1 ? 'disabled' : ''}
+                    onclick="changePage('${entity}',${page - 1})">ก่อนหน้า</button>
+            <span style="padding:5px 7px">${page} / ${pages}</span>
+            <button ${page >= pages ? 'disabled' : ''}
+                    onclick="changePage('${entity}',${page + 1})">ถัดไป</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function changePage(entity, page) {
+      AppState.page = page;
+      await renderEntityPage(entity);
+    }
+
+    async function searchEntity(entity) {
+      AppState.search = document.getElementById('entitySearch').value.trim();
+      AppState.page = 1;
+      await renderEntityPage(entity);
+    }
+
+    async function clearEntitySearch(entity) {
+      AppState.search = '';
+      AppState.page = 1;
+      await renderEntityPage(entity);
+    }
+
+    function openEntityForm(entity, record = null) {
+      const config = ENTITY_CONFIG[entity];
+
+      const fieldsHtml = config.fields.map(function(field) {
+        const [key, label, type, required, options] = field;
+        const value = record && record[key] != null ? record[key] : '';
+
+        let input = '';
+
+        if (type === 'textarea') {
+          input = `
+            <textarea id="form_${key}" name="${key}">${escapeHtml(value)}</textarea>
+          `;
+        } else if (type === 'select') {
+          input = `
+            <select id="form_${key}" name="${key}">
+              <option value="">เลือก${label}</option>
+              ${(options || []).map(function(option) {
+                return `
+                  <option value="${escapeHtml(option[0])}"
+                    ${String(value) === String(option[0]) ? 'selected' : ''}>
+                    ${escapeHtml(option[1])}
+                  </option>
+                `;
+              }).join('')}
+            </select>
+          `;
+        } else {
+          input = `
+            <input id="form_${key}" name="${key}"
+                   type="${type}"
+                   value="${escapeHtml(type === 'date' && !value ? todayInput() : value)}"
+                   ${required ? 'required' : ''}
+                   ${type === 'number' ? 'step="0.01" min="0"' : ''}>
+          `;
+        }
+
+        return `
+          <div class="field ${type === 'textarea' ? 'full' : ''}">
+            <label for="form_${key}">${label}${required ? ' *' : ''}</label>
+            ${input}
+          </div>
+        `;
+      }).join('');
+
+      openModal(
+        record ? 'แก้ไข' + config.title : 'เพิ่ม' + config.title,
+        `
+          <form id="entityForm">
+            <div class="form-grid">${fieldsHtml}</div>
+            <input type="hidden" id="form_id" value="${escapeHtml(record ? record.id : '')}">
+          </form>
+        `,
+        `
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitEntityForm('${entity}')">
+            ${icon('check', 17)}
+            บันทึกข้อมูล
+          </button>
+        `
+      );
+    }
+
+    function editEntity(entity, id) {
+      const record = AppState.pageData.find(function(r) {
+        return String(r.id) === String(id);
+      });
+
+      if (!record) {
+        toast('ไม่พบข้อมูลรายการที่ต้องการแก้ไข', 'error');
+        return;
+      }
+
+      openEntityForm(entity, record);
+    }
+
+    async function submitEntityForm(entity) {
+      const form = document.getElementById('entityForm');
+
+      if (!form.reportValidity()) return;
+
+      const payload = {};
+
+      new FormData(form).forEach(function(value, key) {
+        payload[key] = value;
+      });
+
+      const id = document.getElementById('form_id').value;
+
+      if (id) payload.id = id;
+
+      try {
+        await callApi('apiSave', AppState.token, entity, payload);
+        closeModal();
+        toast('บันทึกข้อมูลเรียบร้อย');
+        await renderEntityPage(entity);
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function deleteEntity(entity, id) {
+      const confirmed = await confirmDialog(
+        'ยืนยันการยกเลิกรายการ',
+        'รายการนี้จะถูกทำเครื่องหมายยกเลิก และไม่แสดงในรายการปกติ'
+      );
+
+      if (!confirmed) return;
+
+      try {
+        await callApi('apiDelete', AppState.token, entity, id);
+        toast('ยกเลิกรายการเรียบร้อย');
+        await renderEntityPage(entity);
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    function openStockModal(productId) {
+      const product = AppState.pageData.find(function(p) {
+        return String(p.id) === String(productId);
+      });
+
+      if (!product) {
+        toast('ไม่พบสินค้า', 'error');
+        return;
+      }
+
+      openModal(
+        'ปรับปรุงสต็อกสินค้า',
+        `
+          <div class="notice">
+            สินค้า: <strong>${escapeHtml(product.name)}</strong><br>
+            คงเหลือปัจจุบัน: <strong>${Number(product.quantity || 0)}</strong>
+            ${escapeHtml(product.unit || '')}
+          </div>
+
+          <form id="stockForm">
+            <div class="field">
+              <label>ประเภทการเคลื่อนไหว</label>
+              <select name="movementType" required>
+                <option value="IN">รับสินค้าเข้า</option>
+                <option value="OUT">เบิก / ตัดสินค้าออก</option>
+                <option value="ADJUST">ปรับยอดคงเหลือเป็นจำนวนใหม่</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>จำนวน</label>
+              <input type="number" name="quantity" min="0.01"
+                     step="0.01" required>
+            </div>
+
+            <div class="field">
+              <label>ต้นทุนต่อหน่วย</label>
+              <input type="number" name="unitCost" min="0"
+                     step="0.01" value="${Number(product.costPrice || 0)}">
+            </div>
+
+            <div class="field">
+              <label>วันที่</label>
+              <input type="date" name="date" value="${todayInput()}" required>
+            </div>
+
+            <div class="field">
+              <label>เลขอ้างอิง</label>
+              <input name="reference">
+            </div>
+
+            <div class="field">
+              <label>รายละเอียด</label>
+              <textarea name="description"></textarea>
+            </div>
+          </form>
+        `,
+        `
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitStock('${productId}')">
+            บันทึกการเคลื่อนไหว
+          </button>
+        `
+      );
+    }
+
+    async function submitStock(productId) {
+      const form = document.getElementById('stockForm');
+
+      if (!form.reportValidity()) return;
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+      payload.productId = productId;
+
+      try {
+        await callApi('apiStockMovement', AppState.token, payload);
+        closeModal();
+        toast('บันทึกการเคลื่อนไหวสินค้าแล้ว');
+        await renderEntityPage('Products');
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function renderJournals() {
+      const result = await callApi('apiList', AppState.token, 'JournalEntries', {
+        page: 1,
+        pageSize: 300
+      });
+
+      const rows = result.data || [];
+
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading(
+          'สมุดรายวัน',
+          'บันทึกรายการเดบิตและเครดิตที่ต้องสมดุล',
+          `<button class="btn btn-primary" onclick="openJournalForm()">
+            ${icon('plus', 17)} บันทึกสมุดรายวัน
+          </button>`
+        )}
+
+        <div class="notice warning">
+          สมุดรายวันจะตรวจสอบยอดเดบิตและเครดิตก่อนบันทึก
+        </div>
+
+        <div class="panel">
+          ${rows.length ? `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เลขที่เอกสาร</th>
+                    <th>วันที่</th>
+                    <th>รายละเอียด</th>
+                    <th class="text-right">เดบิต</th>
+                    <th class="text-right">เครดิต</th>
+                    <th>สถานะ</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(function(r) {
+                    return `
+                      <tr>
+                        <td>${escapeHtml(r.documentNo)}</td>
+                        <td>${dateText(r.date)}</td>
+                        <td>${escapeHtml(r.description || '-')}</td>
+                        <td class="text-right">${money(r.debitTotal)}</td>
+                        <td class="text-right">${money(r.creditTotal)}</td>
+                        <td><span class="badge badge-success">ผ่านการบันทึก</span></td>
+                        <td>
+                          <button class="table-action"
+                            onclick="viewJournal('${r.id}')"
+                            title="ดูรายละเอียด">${icon('eye', 16)}</button>
+                          <button class="table-action"
+                            onclick="createDocument('journal','${r.id}')"
+                            title="สร้างเอกสาร">${icon('file', 16)}</button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : emptyState('ยังไม่มีรายการสมุดรายวัน')}
+        </div>
+      `;
+    }
+
+    function openJournalForm() {
+      if (!AppState.accounts.length) {
+        toast('ไม่พบผังบัญชี กรุณาตรวจสอบการติดตั้งระบบ', 'error');
+        return;
+      }
+
+      openModal(
+        'บันทึกสมุดรายวัน',
+        `
+          <form id="journalForm">
+            <div class="form-grid">
+              <div class="field">
+                <label>วันที่</label>
+                <input type="date" name="date" value="${todayInput()}" required>
+              </div>
+              <div class="field">
+                <label>เลขอ้างอิง</label>
+                <input name="reference">
+              </div>
+              <div class="field full">
+                <label>คำอธิบายรายการ</label>
+                <input name="description" required>
+              </div>
+            </div>
+
+            <div class="panel" style="padding:12px">
+              <div class="panel-header">
+                <div class="panel-title">รายละเอียดบัญชี</div>
+                <button type="button" class="btn btn-secondary"
+                        onclick="addJournalLine()">
+                  ${icon('plus', 15)} เพิ่มบรรทัด
+                </button>
+              </div>
+
+              <div class="journal-line" style="font-weight:700;color:#718096">
+                <div>บัญชี</div>
+                <div>คำอธิบาย</div>
+                <div>เดบิต</div>
+                <div>เครดิต</div>
+                <div></div>
+              </div>
+
+              <div id="journalLines"></div>
+
+              <div class="journal-total">
+                <span>เดบิต: <strong id="journalDebitTotal">0.00</strong></span>
+                <span>เครดิต: <strong id="journalCreditTotal">0.00</strong></span>
+              </div>
+
+              <div id="journalBalanceNotice" class="notice warning">
+                กรุณากรอกรายการให้เดบิตเท่ากับเครดิต
+              </div>
+            </div>
+          </form>
+        `,
+        `
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitJournal()">
+            ${icon('check', 17)} ตรวจสอบและบันทึก
+          </button>
+        `,
+        true
+      );
+
+      addJournalLine();
+      addJournalLine();
+    }
+
+    function addJournalLine() {
+      const root = document.getElementById('journalLines');
+      if (!root) return;
+
+      const row = document.createElement('div');
+      row.className = 'journal-line';
+
+      row.innerHTML = `
+        <select class="journal-account" required>
+          <option value="">เลือกบัญชี</option>
+          ${AppState.accounts.map(function(a) {
+            return `
+              <option value="${escapeHtml(a.code)}"
+                      data-name="${escapeHtml(a.name)}">
+                ${escapeHtml(a.code)} - ${escapeHtml(a.name)}
+              </option>
+            `;
+          }).join('')}
+        </select>
+
+        <input class="journal-description" placeholder="คำอธิบาย">
+
+        <input class="journal-debit" type="number"
+               min="0" step="0.01" value="0">
+
+        <input class="journal-credit" type="number"
+               min="0" step="0.01" value="0">
+
+        <button type="button" class="table-action danger"
+                onclick="this.closest('.journal-line').remove();calculateJournal()">
+          ${icon('trash', 16)}
+        </button>
+      `;
+
+      row.querySelectorAll('input,select').forEach(function(input) {
+        input.addEventListener('input', calculateJournal);
+        input.addEventListener('change', calculateJournal);
+      });
+
+      root.appendChild(row);
+      calculateJournal();
+    }
+
+    function calculateJournal() {
+      const root = document.getElementById('journalLines');
+      if (!root) return;
+
+      let debit = 0;
+      let credit = 0;
+
+      root.querySelectorAll('.journal-line').forEach(function(row) {
+        debit += Number(row.querySelector('.journal-debit').value || 0);
+        credit += Number(row.querySelector('.journal-credit').value || 0);
+      });
+
+      debit = Math.round(debit * 100) / 100;
+      credit = Math.round(credit * 100) / 100;
+
+      document.getElementById('journalDebitTotal').textContent = money(debit);
+      document.getElementById('journalCreditTotal').textContent = money(credit);
+
+      const notice = document.getElementById('journalBalanceNotice');
+
+      if (debit > 0 && debit === credit) {
+        notice.className = 'notice';
+        notice.textContent = 'ยอดเดบิตและเครดิตสมดุล สามารถบันทึกได้';
+      } else {
+        notice.className = 'notice warning';
+        notice.textContent = 'ยอดเดบิตและเครดิตยังไม่สมดุล';
+      }
+    }
+
+    async function submitJournal() {
+      const form = document.getElementById('journalForm');
+
+      if (!form.reportValidity()) return;
+
+      const rows = Array.from(
+        document.querySelectorAll('#journalLines .journal-line')
+      );
+
+      const lines = rows.map(function(row) {
+        const select = row.querySelector('.journal-account');
+        const option = select.options[select.selectedIndex];
+
+        return {
+          accountCode: select.value,
+          accountName: option ? option.dataset.name : '',
+          description: row.querySelector('.journal-description').value,
+          debit: Number(row.querySelector('.journal-debit').value || 0),
+          credit: Number(row.querySelector('.journal-credit').value || 0)
+        };
+      });
+
+      const payload = {
+        date: form.elements.date.value,
+        reference: form.elements.reference.value,
+        description: form.elements.description.value,
+        lines: lines
+      };
+
+      try {
+        const result = await callApi(
+          'apiCreateJournal',
+          AppState.token,
+          payload
+        );
+
+        closeModal();
+        toast('บันทึกสมุดรายวัน ' + result.documentNo + ' เรียบร้อย');
+        await renderJournals();
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function viewJournal(id) {
+      try {
+        const result = await callApi('apiGetJournal', AppState.token, id);
+
+        const entry = result.entry;
+        const lines = result.lines || [];
+
+        openModal(
+          'รายละเอียดสมุดรายวัน',
+          `
+            <div class="summary-row">
+              <span class="summary-label">เลขที่เอกสาร</span>
+              <strong>${escapeHtml(entry.documentNo)}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">วันที่</span>
+              <strong>${dateText(entry.date)}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">รายละเอียด</span>
+              <strong>${escapeHtml(entry.description || '-')}</strong>
+            </div>
+
+            <div class="table-wrap" style="margin-top:15px">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสบัญชี</th>
+                    <th>ชื่อบัญชี</th>
+                    <th class="text-right">เดบิต</th>
+                    <th class="text-right">เครดิต</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${lines.map(function(line) {
+                    return `
+                      <tr>
+                        <td>${escapeHtml(line.accountCode)}</td>
+                        <td>${escapeHtml(line.accountName)}</td>
+                        <td class="text-right">${money(line.debit)}</td>
+                        <td class="text-right">${money(line.credit)}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="journal-total">
+              <span>เดบิต ${money(entry.debitTotal)}</span>
+              <span>เครดิต ${money(entry.creditTotal)}</span>
+            </div>
+          `,
+          `
+            <button class="btn btn-secondary" onclick="closeModal()">ปิด</button>
+            <button class="btn btn-primary"
+              onclick="closeModal();createDocument('journal','${id}')">
+              ${icon('file', 17)} สร้างเอกสาร
+            </button>
+          `
+        );
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    function generateReportPdf() {
+      const report = AppState.report;
+      if (!report) {
+        toast('กรุณากดแสดงรายงานก่อนสร้าง PDF', 'warning');
+        return;
+      }
+
+      const titles = {
+        'income-expense': 'รายงานรายรับ - รายจ่าย',
+        'trial-balance': 'งบทดลองจากสมุดรายวัน',
+        'stock': 'รายงานสินค้าคงเหลือ',
+        'transactions': 'รายงานรายการทั้งหมด'
+      };
+      const title = titles[report.reportType] || 'รายงาน';
+      const asOf = new Date().toLocaleString('th-TH', {
+        dateStyle: 'long', timeStyle: 'short'
+      });
+      const period = report.startDate && report.endDate
+        ? `ระหว่างวันที่ ${escapeHtml(dateText(report.startDate))} ถึง ${escapeHtml(dateText(report.endDate))}`
+        : '';
+      const num = v => money(v == null ? 0 : v);
+      const cell = v => escapeHtml(v == null || v === '' ? '-' : String(v));
+      let headers = [];
+      let rows = [];
+      let summary = '';
+      let note = '';
+
+      if (report.reportType === 'income-expense') {
+        headers = ['วันที่', 'ประเภท', 'รายละเอียด', 'จำนวนเงิน (บาท)'];
+        rows = (report.rows || []).map(r => [dateText(r.date), r.type === 'Income' ? 'รายรับ' : 'รายจ่าย', r.description || '-', num(r.amount)]);
+        summary = `<div class="summary"><div>รายรับรวม <b>${num(report.income)} บาท</b></div><div>รายจ่ายรวม <b>${num(report.expense)} บาท</b></div><div>ผลต่างสุทธิ <b>${num(report.net)} บาท</b></div></div>`;
+      } else if (report.reportType === 'trial-balance') {
+        headers = ['รหัสบัญชี', 'ชื่อบัญชี', 'ประเภท', 'เดบิต', 'เครดิต', 'ผลต่าง'];
+        rows = (report.rows || []).map(r => [r.code, r.name, r.type, num(r.debit), num(r.credit), num(r.balance)]);
+        rows.push(['', 'รวม', '', num(report.totalDebit), num(report.totalCredit), '']);
+        note = 'หมายเหตุ: รายงานนี้คำนวณจากรายการสมุดรายวันที่บันทึกผ่านระบบเท่านั้น ไม่รวมรายการรับจ่ายที่ยังไม่ได้ผ่านการบันทึกบัญชี';
+      } else if (report.reportType === 'stock') {
+        headers = ['รหัส', 'สินค้า', 'จำนวน', 'หน่วย', 'ต้นทุนต่อหน่วย', 'มูลค่าคงเหลือ', 'สถานะ'];
+        rows = (report.rows || []).map(r => [r.code, r.name, r.quantity, r.unit || '-', num(r.costPrice), num(r.stockValue), r.lowStock ? 'ใกล้หมด' : 'ปกติ']);
+        summary = `<div class="summary">มูลค่าสินค้าคงเหลือรวม <b>${num(report.totalValue)} บาท</b></div>`;
+      } else {
+        headers = ['วันที่', 'ประเภท', 'รายละเอียด', 'จำนวนเงิน (บาท)'];
+        rows = (report.rows || []).map(r => [dateText(r.date), r.type === 'Income' ? 'รายรับ' : 'รายจ่าย', r.description || '-', num(r.amount)]);
+      }
+
+      const table = `<table><thead><tr>${headers.map(h => `<th>${cell(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map((v,i) => `<td class="${i >= 3 ? 'numeric' : ''}">${cell(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+      const orgName = AppState.settings.businessName || AppState.settings.organizationName || AppState.settings.orgName || 'หน่วยงาน / องค์กร';
+      const orgAddress = AppState.settings.businessAddress || '';
+      const doc = `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${cell(title)}</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+        @page { size: A4 portrait; margin: 16mm 15mm 18mm; }
+        *{box-sizing:border-box}
+        html,body{margin:0;padding:0;background:#fff;color:#111}
+        body{font-family:'Noto Sans Thai',Tahoma,sans-serif;font-size:11pt;line-height:1.55;font-weight:400;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .paper{width:100%;max-width:180mm;margin:0 auto}
+        .doc-head{text-align:center;margin:0 0 10pt;padding-bottom:9pt;border-bottom:1.5pt solid #222}
+        .org{font-size:16pt;font-weight:700;line-height:1.2}
+        .org-address{font-size:10pt;margin-top:3pt;line-height:1.25}
+        .heading{font-size:17pt;font-weight:700;margin-top:8pt;line-height:1.2}
+        .period{font-size:11pt;margin-top:5pt}
+        .doc-meta{display:flex;justify-content:flex-end;font-size:9.5pt;margin:8pt 0 12pt}
+        .summary{border:1.2pt solid #333;padding:8pt 11pt;margin:10pt 0 13pt;display:flex;justify-content:space-between;gap:8pt;flex-wrap:wrap;font-size:10pt;line-height:1.5}
+        table{width:100%;border-collapse:collapse;table-layout:auto;font-size:9.5pt;line-height:1.4}
+        thead{display:table-header-group} tr{break-inside:avoid;page-break-inside:avoid}
+        th,td{border:0.8pt solid #333;padding:6pt 7pt;vertical-align:middle}
+        th{text-align:center;font-weight:700;background:#e9edf2 !important;color:#111}
+        tbody tr:nth-child(even){background:#f7f8fa}
+        tbody tr:last-child td{font-weight:700;border-top:1.5pt double #222}
+        .numeric{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+        .note{font-size:9pt;margin-top:12pt;text-align:justify;line-height:1.3}
+        .signatures{display:flex;justify-content:space-between;gap:10pt;margin-top:25pt;text-align:center;break-inside:avoid;page-break-inside:avoid;font-size:9.5pt}
+        .sign{width:32%}.line{border-top:0;margin:20pt 4pt 5pt}
+        @media screen{body{padding:12mm;max-width:210mm;margin:auto}.paper{max-width:180mm}}
+        @media print{body{padding:0}.paper{max-width:none}thead{display:table-header-group}}
+      </style></head><body><main class="paper"><header class="doc-head"><div class="org">${cell(orgName)}</div>${orgAddress ? `<div class="org-address">${cell(orgAddress)}</div>` : ''}<div class="heading">${cell(title)}</div><div class="period">${period}</div></header><div class="doc-meta">ข้อมูล ณ วันที่ ${cell(asOf)}</div>${summary}${table}${note ? `<div class="note">${cell(note)}</div>` : ''}<div class="signatures"><div class="sign"><div class="line"></div>ลงชื่อ................................................<br>ผู้จัดทำรายงาน</div><div class="sign"><div class="line"></div>ลงชื่อ................................................<br>ผู้ตรวจสอบ</div><div class="sign"><div class="line"></div>ลงชื่อ................................................<br>ผู้อนุมัติ</div></div></main><script>window.onload=async function(){try{if(document.fonts&&document.fonts.ready){await document.fonts.load('19pt \"TH Sarabun New\"');await document.fonts.load('19pt Sarabun');await document.fonts.load('19pt \"Noto Sans Thai\"');await document.fonts.ready;}}catch(e){}setTimeout(function(){window.focus();window.print()},700)};<\/script></body></html>`;
+      const popup = window.open('', '_blank');
+      if (!popup) {
+        toast('เบราว์เซอร์บล็อกหน้าต่างเอกสาร กรุณาอนุญาตป๊อปอัปแล้วลองอีกครั้ง', 'error');
+        return;
+      }
+      popup.document.open();
+      popup.document.write(doc);
+      popup.document.close();
+    }
+
+
+    // Web Bluetooth BLE transport for thermal printers. Browser requires HTTPS/localhost.
+    let disbursementBleDevice = null;
+    let disbursementBleServer = null;
+    let disbursementPrinterCharacteristic = null;
+    let disbursementBleService = null;
+
+    const PRINTER_SERVICE_CANDIDATES = [
+      '000018f0-0000-1000-8000-00805f9b34fb',
+      '0000ff00-0000-1000-8000-00805f9b34fb',
+      '0000ffe0-0000-1000-8000-00805f9b34fb',
+      '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+    ];
+
+    function setPrinterStatus(text) {
+      const el = document.getElementById('printerConnectionStatus');
+      if (el) el.textContent = text;
+    }
+
+    async function connectDisbursementPrinter() {
+      if (!('bluetooth' in navigator)) {
+        toast('เบราว์เซอร์นี้ไม่รองรับ Web Bluetooth กรุณาใช้ Chrome/Edge บน HTTPS', 'error');
+        return;
+      }
+      try {
+        const optionalServices = PRINTER_SERVICE_CANDIDATES.slice();
+        disbursementBleDevice = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: 'PHOMARK' }, { namePrefix: 'JHP' }],
+          optionalServices
+        }).catch(async () => navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices
+        }));
+
+        disbursementBleDevice.addEventListener('gattserverdisconnected', () => {
+          disbursementBleServer = null;
+          disbursementPrinterCharacteristic = null;
+          setPrinterStatus('การเชื่อมต่อขาดหาย');
+        });
+        disbursementBleServer = await disbursementBleDevice.gatt.connect();
+
+        const services = [];
+        for (const uuid of PRINTER_SERVICE_CANDIDATES) {
+          try { services.push(await disbursementBleServer.getPrimaryService(uuid)); }
+          catch (_) {}
+        }
+        if (!services.length) {
+          try {
+            const all = await disbursementBleServer.getPrimaryServices();
+            services.push(...all);
+          } catch (_) {}
+        }
+
+        let chosen = null;
+        for (const service of services) {
+          let chars = [];
+          try { chars = await service.getCharacteristics(); } catch (_) {}
+          chosen = chars.find(c => c.properties.writeWithoutResponse) ||
+                   chars.find(c => c.properties.write) || null;
+          if (chosen) { disbursementBleService = service; break; }
+        }
+        if (!chosen) {
+          throw new Error('已连接设备，但找不到可写入的打印特征值。需要该型号的 BLE Service/Characteristic UUID。');
+        }
+        disbursementPrinterCharacteristic = chosen;
+        setPrinterStatus('เชื่อมต่อแล้ว • ' + (disbursementBleDevice.name || 'BLE Printer'));
+        toast('เชื่อมต่อเครื่องพิมพ์แล้ว');
+      } catch (e) {
+        disbursementBleDevice = null;
+        disbursementBleServer = null;
+        disbursementPrinterCharacteristic = null;
+        setPrinterStatus('ยังไม่เชื่อมต่อ');
+        toast('เชื่อมต่อไม่สำเร็จ: ' + (e.message || e), 'error');
+      }
+    }
+
+    async function disconnectDisbursementPrinter() {
+      try {
+        if (disbursementBleDevice?.gatt?.connected) disbursementBleDevice.gatt.disconnect();
+      } catch (_) {}
+      disbursementBleDevice = null;
+      disbursementBleServer = null;
+      disbursementPrinterCharacteristic = null;
+      disbursementBleService = null;
+      setPrinterStatus('ยังไม่เชื่อมต่อ');
+      toast('ยกเลิกการเชื่อมต่อแล้ว');
+    }
+
+    function wrapReceiptText(ctx, text, maxWidth) {
+      const out=[]; let line='';
+      for (const ch of String(text ?? '')) {
+        if (ch === '\n') { out.push(line); line=''; continue; }
+        const test=line+ch;
+        if (line && ctx.measureText(test).width>maxWidth) { out.push(line); line=ch; } else line=test;
+      }
+      if (line) out.push(line);
+      return out;
+    }
+
+    function buildDisbursementRaster(receipt) {
+      const width=576, margin=18, contentWidth=width-margin*2, lineHeight=34;
+      const canvas=document.createElement('canvas');
+      const ctx=canvas.getContext('2d');
+      const rows=[];
+      const add=(text,kind='normal',align='left')=>rows.push({text:String(text??''),kind,align});
+      add(AppState.settings.businessName||'ชื่อกิจการ','title','center');
+      add('ใบสั่งจ่าย / ใบเบิกเงิน','heading','center');
+      add('--------------------------------','small','center');
+      add('เลขที่: '+(receipt.documentNo||'-'));
+      add('วันที่: '+(receipt.date||'-'));
+      add('ผู้รับเงิน: '+(receipt.payee||'-'));
+      add('วิธีจ่าย: '+(receipt.method||'-'));
+      if(receipt.bankName) add('ธนาคาร/ช่องทาง: '+receipt.bankName);
+      if(receipt.accountRef) add('เลขอ้างอิง: '+receipt.accountRef);
+      add('วัตถุประสงค์: '+(receipt.purpose||'-'));
+      if(receipt.note) add('หมายเหตุ: '+receipt.note);
+      add('--------------------------------','small','center');
+      add(Number(receipt.amount||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+' บาท','amount','center');
+      add('สถานะ: '+(receipt.status||'-'));
+      add(''); add('ลงชื่อ................................'); add('ผู้เบิกเงิน');
+      add(''); add('ลงชื่อ................................'); add('ผู้อนุมัติ');
+      add(''); add('ลงชื่อ................................'); add('ผู้รับเงิน');
+      add(''); add('เอกสารควบคุมการจ่ายเงินภายในกิจการ','small','center');
+      add('ไม่ใช่เช็คธนาคาร','small','center');
+      ctx.font='24px "Noto Sans Thai", Tahoma, sans-serif';
+      const measured=[];
+      for(const row of rows){
+        ctx.font=row.kind==='title'?'bold 30px "Noto Sans Thai", Tahoma, sans-serif':row.kind==='heading'?'bold 27px "Noto Sans Thai", Tahoma, sans-serif':row.kind==='amount'?'bold 32px "Noto Sans Thai", Tahoma, sans-serif':row.kind==='small'?'20px "Noto Sans Thai", Tahoma, sans-serif':'24px "Noto Sans Thai", Tahoma, sans-serif';
+        const wrapped=wrapReceiptText(ctx,row.text,contentWidth);
+        wrapped.forEach(t=>measured.push({...row,text:t,font:ctx.font}));
+      }
+      const height=Math.max(300,measured.length*lineHeight+28); canvas.width=width; canvas.height=height;
+      const c=canvas.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,width,height); c.fillStyle='#000';
+      let y=14;
+      for(const row of measured){c.font=row.font;c.textBaseline='top';c.textAlign=row.align;c.fillText(row.text,row.align==='center'?width/2:margin,y,contentWidth);y+=lineHeight;}
+      const rgba=c.getImageData(0,0,width,height).data;
+      const bytesPerRow=Math.ceil(width/8), raster=new Uint8Array(bytesPerRow*height);
+      for(let y0=0;y0<height;y0++) for(let x=0;x<width;x++){
+        const i=(y0*width+x)*4;
+        if(rgba[i]<180) raster[y0*bytesPerRow+(x>>3)]|=(0x80>>(x&7));
+      }
+      const header=Uint8Array.from([0x1d,0x76,0x30,0x00,bytesPerRow&255,(bytesPerRow>>8)&255,height&255,(height>>8)&255]);
+      const init=Uint8Array.from([0x1b,0x40]);
+      const feedCut=Uint8Array.from([0x1b,0x64,0x04,0x1d,0x56,0x00]);
+      const out=new Uint8Array(init.length+header.length+raster.length+feedCut.length);
+      let pos=0;out.set(init,pos);pos+=init.length;out.set(header,pos);pos+=header.length;out.set(raster,pos);pos+=raster.length;out.set(feedCut,pos);
+      return out;
+    }
+
+    async function sendDisbursementToPrinter(receipt) {
+      if (!disbursementPrinterCharacteristic) throw new Error('กรุณาเชื่อมต่อเครื่องพิมพ์ก่อน');
+      if (document.fonts?.load) await document.fonts.load('24px "Noto Sans Thai"');
+      if (document.fonts?.ready) await document.fonts.ready;
+      await new Promise(resolve => setTimeout(resolve, 150));
+      const bytes=buildDisbursementRaster(receipt);
+      const ch=disbursementPrinterCharacteristic;
+      const packetSize=ch.properties.writeWithoutResponse ? 180 : 180;
+      for(let i=0;i<bytes.length;i+=packetSize){
+        const packet=bytes.slice(i,Math.min(i+packetSize,bytes.length));
+        if(ch.properties.writeWithoutResponse && ch.writeValueWithoutResponse) await ch.writeValueWithoutResponse(packet);
+        else await ch.writeValue(packet);
+        if (i + packetSize < bytes.length) await new Promise(resolve=>setTimeout(resolve, 12));
+      }
+      toast('ส่งข้อมูลภาพพิมพ์แล้ว โปรดตรวจสอบผลจากเครื่องพิมพ์');
+    }
+
+    async function testDisbursementPrinter() {
+      try { await sendDisbursementToPrinter({documentNo:'TEST-80MM',date:new Date().toLocaleDateString('th-TH'),payee:'ทดสอบเครื่องพิมพ์',purpose:'ทดสอบการเชื่อมต่อ Bluetooth และคำสั่ง ESC/POS',method:'ทดสอบ',amount:0,status:'ทดสอบ'}); }
+      catch(e) { toast(e.message,'error'); }
+    }
+
+    async function renderDisbursements() {
+      const res=await rpc('apiList',AppState.token,'Disbursements',{page:1,pageSize:500}); const rows=res.data||[];
+      const fmt=n=>Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+      document.getElementById('pageContent').innerHTML=`
+        <div class="page-heading"><div><h2>ใบสั่งจ่าย / ใบเบิกเงิน</h2><p>เอกสารควบคุมการเบิกและจ่ายเงินภายในกิจการ</p></div></div>
+        <div class="panel"><h3>เครื่องพิมพ์ Bluetooth BLE 80 mm</h3><div class="form-grid">
+          <div class="field"><label>การเชื่อมต่อ</label><div>Bluetooth Low Energy (BLE)</div></div>
+          <div class="field"><label>สถานะ</label><div id="printerConnectionStatus">ยังไม่เชื่อมต่อ</div></div>
+        </div><div class="page-actions"><button class="btn btn-primary" onclick="connectDisbursementPrinter()">เชื่อมต่อเครื่องพิมพ์</button><button class="btn btn-secondary" onclick="testDisbursementPrinter()">ทดสอบพิมพ์และตัดกระดาษ</button><button class="btn btn-secondary" onclick="disconnectDisbursementPrinter()">ยกเลิกการเชื่อมต่อ</button></div><p class="small muted">ต้องเปิดผ่าน HTTPS และ Chrome/Edge ที่รองรับ Web Bluetooth. หากเชื่อมต่อได้แต่พิมพ์ไม่ออก เครื่องอาจใช้ UUID เฉพาะผู้ผลิตหรือโปรโตคอลเฉพาะรุ่น; คำสั่งภาพใช้ ESC/POS raster และตัดกระดาษแบบมาตรฐาน</p></div>
+        <div class="panel"><h3>จัดทำใบสั่งจ่ายใหม่</h3><div class="form-grid">
+        <div class="field"><label>วันที่</label><input id="disDate" type="date" value="${todayInput()}"></div>
+        <div class="field"><label>ผู้รับเงิน / พนักงาน</label><input id="disPayee" required></div>
+        <div class="field"><label>จำนวนเงิน (บาท)</label><input id="disAmount" type="number" min="0.01" step="0.01"></div>
+        <div class="field"><label>วิธีจ่าย</label><select id="disMethod"><option>เงินสด</option><option>ธนาคาร</option></select></div>
+        <div class="field"><label>ธนาคาร / ช่องทาง (ถ้ามี)</label><input id="disBank"></div>
+        <div class="field"><label>เลขอ้างอิงบัญชี/รายการ</label><input id="disRef"></div>
+        <div class="field" style="grid-column:1/-1"><label>วัตถุประสงค์การเบิก</label><textarea id="disPurpose"></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label>หมายเหตุ</label><textarea id="disNote"></textarea></div></div>
+        <button class="btn btn-primary" onclick="submitDisbursement()">บันทึกใบสั่งจ่าย</button></div>
+        <div class="panel"><h3>ทะเบียนใบสั่งจ่าย</h3><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>วันที่</th><th>ผู้รับเงิน</th><th>วัตถุประสงค์</th><th class="text-right">จำนวนเงิน</th><th>วิธีจ่าย</th><th>สถานะ</th><th>ดำเนินการ</th></tr></thead><tbody>
+        ${rows.map(r=>`<tr><td>${escapeHtml(r.documentNo)}</td><td>${escapeHtml(dateText(r.date))}</td><td>${escapeHtml(r.payee)}</td><td>${escapeHtml(r.purpose)}</td><td class="text-right">${fmt(r.amount)}</td><td>${escapeHtml(r.method)}</td><td>${escapeHtml(r.status)}</td><td><button class="btn btn-secondary" onclick="printDisbursement('${r.id}')">พิมพ์ 80mm</button> ${r.status==='รออนุมัติ'&&AppState.user.role==='Admin'?`<button class="btn btn-secondary" onclick="changeDisbursement('${r.id}','approve')">อนุมัติ</button>`:''} ${r.status==='อนุมัติแล้ว'&&AppState.user.role==='Admin'?`<button class="btn btn-primary" onclick="changeDisbursement('${r.id}','paid')">บันทึกจ่าย</button>`:''} ${r.status!=='จ่ายแล้ว'&&r.status!=='ยกเลิก'&&AppState.user.role==='Admin'?`<button class="btn btn-secondary" onclick="changeDisbursement('${r.id}','cancel')">ยกเลิก</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8">ยังไม่มีใบสั่งจ่าย</td></tr>'}
+        </tbody></table></div></div>`;
+    }
+    async function submitDisbursement(){try{const payload={date:document.getElementById('disDate').value,payee:document.getElementById('disPayee').value,amount:document.getElementById('disAmount').value,method:document.getElementById('disMethod').value,bankName:document.getElementById('disBank').value,accountRef:document.getElementById('disRef').value,purpose:document.getElementById('disPurpose').value,note:document.getElementById('disNote').value};const r=await rpc('apiCreateDisbursement',AppState.token,payload);toast('บันทึก '+r.documentNo+' แล้ว');await renderDisbursements();}catch(e){toast(e.message,'error');}}
+    async function changeDisbursement(id,action){try{await rpc('apiUpdateDisbursementStatus',AppState.token,id,action);toast('ปรับสถานะเรียบร้อย');await renderDisbursements();}catch(e){toast(e.message,'error');}}
+    async function printDisbursement(id){
+      try {
+        const res=await rpc('apiList',AppState.token,'Disbursements',{page:1,pageSize:500});
+        const r=(res.data||[]).find(x=>x.id===id); if(!r) throw new Error('ไม่พบใบสั่งจ่าย');
+        if(disbursementPrinterCharacteristic){
+          await sendDisbursementToPrinter(r);
+          return;
+        }
+        const org=AppState.settings.businessName||'ชื่อกิจการ';
+        const esc=s=>String(s||'-').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const w=window.open('','_blank');
+        if(!w){toast('กรุณาอนุญาตป๊อปอัป หรือเชื่อมต่อเครื่องพิมพ์โดยตรงก่อน','error');return;}
+        w.document.write(`<!doctype html><html lang="th"><meta charset="utf-8"><style>@page{size:80mm auto;margin:3mm}*{box-sizing:border-box}body{width:74mm;margin:0 auto;font:12px 'Noto Sans Thai',sans-serif;color:#111}h3{text-align:center;font-size:15px;margin:4px 0}p{margin:4px 0;overflow-wrap:anywhere}.rule{border-top:1px dashed #222;margin:7px 0}.amount{text-align:center;font-size:17px;font-weight:bold;margin:10px 0}.sign{margin-top:16px;text-align:center}.small{text-align:center;font-size:10px}</style><body><h3>${esc(org)}</h3><h3>ใบสั่งจ่าย / ใบเบิกเงิน</h3><p>เลขที่: ${esc(r.documentNo)}</p><p>วันที่: ${esc(r.date)}</p><div class="rule"></div><p>ผู้รับเงิน: ${esc(r.payee)}</p><p>วัตถุประสงค์: ${esc(r.purpose)}</p><p>วิธีจ่าย: ${esc(r.method)}</p>${r.bankName?`<p>ธนาคาร/ช่องทาง: ${esc(r.bankName)}</p>`:''}${r.accountRef?`<p>เลขอ้างอิง: ${esc(r.accountRef)}</p>`:''}<div class="rule"></div><div class="amount">${Number(r.amount).toLocaleString('th-TH',{minimumFractionDigits:2})} บาท</div><p>สถานะ: ${esc(r.status)}</p><div class="rule"></div><div class="sign">ลงชื่อ......................................<br>ผู้เบิกเงิน</div><div class="sign">ลงชื่อ......................................<br>ผู้อนุมัติ</div><div class="sign">ลงชื่อ......................................<br>ผู้รับเงิน</div><div class="rule"></div><p class="small">เอกสารควบคุมการจ่ายเงินภายในกิจการ<br>ไม่ใช่เช็คธนาคารหรือเอกสารสั่งจ่ายที่ธนาคารรับรอง</p><script>window.onload=()=>{window.focus();window.print()}<\/script></body></html>`);
+        w.document.close();
+      } catch(e){toast(e.message,'error');}
+    }
+
+    function renderReports() {
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading('รายงานทางบัญชี', 'เลือกประเภทรายงานและช่วงเวลาที่ต้องการ')}
+
+        <div class="panel">
+          <div class="form-grid">
+            <div class="field">
+              <label>ประเภทรายงาน</label>
+              <select id="reportType">
+                <option value="income-expense">รายงานรายรับ - รายจ่าย</option>
+                <option value="trial-balance">งบทดลองจากสมุดรายวัน</option>
+                <option value="stock">รายงานสินค้าคงเหลือ</option>
+                <option value="transactions">รายงานรายการทั้งหมด</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>วันที่เริ่มต้น</label>
+              <input type="date" id="reportStart" value="${firstDayInput()}">
+            </div>
+
+            <div class="field">
+              <label>วันที่สิ้นสุด</label>
+              <input type="date" id="reportEnd" value="${todayInput()}">
+            </div>
+          </div>
+
+          <div class="page-actions">
+            <button class="btn btn-primary" onclick="loadReport()">
+              ${icon('chart', 17)} แสดงรายงาน
+            </button>
+            <button class="btn btn-secondary" onclick="generateReportPdf()">
+              ${icon('printer', 17)} พิมพ์รายงาน
+            </button>
+          </div>
+        </div>
+
+        <div id="reportResult"></div>
+      `;
+    }
+
+    async function loadReport() {
+      const type = document.getElementById('reportType').value;
+      const startDate = document.getElementById('reportStart').value;
+      const endDate = document.getElementById('reportEnd').value;
+
+      if (startDate && endDate && startDate > endDate) {
+        toast('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด', 'error');
+        return;
+      }
+
+      try {
+        const result = await callApi('apiGetReport', AppState.token, type, {
+          startDate: startDate,
+          endDate: endDate
+        });
+
+        AppState.report = result;
+        renderReportResult(result);
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    function renderReportResult(result) {
+      const root = document.getElementById('reportResult');
+
+      if (result.reportType === 'income-expense') {
+        root.innerHTML = `
+          <div class="stats-grid">
+            ${statCard('รายรับ', money(result.income) + ' บาท', 'chart')}
+            ${statCard('รายจ่าย', money(result.expense) + ' บาท', 'wallet')}
+            ${statCard('สุทธิ', money(result.net) + ' บาท', 'bank')}
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">สรุปรายรับ - รายจ่าย</div>
+            <div class="summary-row">
+              <span class="summary-label">รายรับรวม</span>
+              <span class="summary-value">${money(result.income)} บาท</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">รายจ่ายรวม</span>
+              <span class="summary-value">${money(result.expense)} บาท</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">ผลต่าง</span>
+              <span class="summary-value">${money(result.net)} บาท</span>
+            </div>
+            ${renderTransactionTable(result.rows || [])}
+          </div>
+        `;
+        return;
+      }
+
+      if (result.reportType === 'trial-balance') {
+        root.innerHTML = `
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">งบทดลองจากสมุดรายวัน</div>
+              <button class="btn btn-secondary" onclick="generateReportPdf()">
+                ${icon('printer', 16)} พิมพ์
+              </button>
+            </div>
+
+            <div class="notice warning">
+              รายงานนี้คำนวณจากรายการสมุดรายวันที่บันทึกผ่านระบบเท่านั้น
+              ไม่รวมรายการรับจ่ายที่ยังไม่ได้ผ่านการบันทึกบัญชี
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสบัญชี</th>
+                    <th>ชื่อบัญชี</th>
+                    <th>ประเภท</th>
+                    <th class="text-right">เดบิต</th>
+                    <th class="text-right">เครดิต</th>
+                    <th class="text-right">ผลต่าง</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(result.rows || []).map(function(r) {
+                    return `
+                      <tr>
+                        <td>${escapeHtml(r.code)}</td>
+                        <td>${escapeHtml(r.name)}</td>
+                        <td>${escapeHtml(r.type)}</td>
+                        <td class="text-right">${money(r.debit)}</td>
+                        <td class="text-right">${money(r.credit)}</td>
+                        <td class="text-right">${money(r.balance)}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                  <tr class="report-total">
+                    <td colspan="3">รวม</td>
+                    <td class="text-right">${money(result.totalDebit)}</td>
+                    <td class="text-right">${money(result.totalCredit)}</td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (result.reportType === 'stock') {
+        root.innerHTML = `
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">รายงานสินค้าคงเหลือ</div>
+              <strong>มูลค่ารวม ${money(result.totalValue)} บาท</strong>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัส</th>
+                    <th>สินค้า</th>
+                    <th>จำนวน</th>
+                    <th>หน่วย</th>
+                    <th class="text-right">ต้นทุนต่อหน่วย</th>
+                    <th class="text-right">มูลค่าคงเหลือ</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${(result.rows || []).map(function(r) {
+                    return `
+                      <tr>
+                        <td>${escapeHtml(r.code)}</td>
+                        <td>${escapeHtml(r.name)}</td>
+                        <td>${r.quantity}</td>
+                        <td>${escapeHtml(r.unit || '')}</td>
+                        <td class="text-right">${money(r.costPrice)}</td>
+                        <td class="text-right">${money(r.stockValue)}</td>
+                        <td>${r.lowStock
+                          ? '<span class="badge badge-warning">ใกล้หมด</span>'
+                          : '<span class="badge badge-success">ปกติ</span>'}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (result.reportType === 'transactions') {
+        root.innerHTML = `
+          <div class="panel">
+            <div class="panel-title">รายการธุรกรรม</div>
+            ${renderTransactionTable(result.rows || [])}
+          </div>
+        `;
+      }
+    }
+
+    async function renderUsers() {
+      if (AppState.user.role !== 'Admin') {
+        throw new Error('ไม่มีสิทธิ์เข้าถึงเมนูนี้');
+      }
+
+      const result = await callApi('apiListUsers', AppState.token);
+      const users = result.data || [];
+
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading(
+          'จัดการผู้ใช้งาน',
+          'กำหนดบัญชีและสิทธิ์การเข้าถึงระบบ',
+          `<button class="btn btn-primary" onclick="openUserForm()">
+            ${icon('plus', 17)} เพิ่มผู้ใช้งาน
+          </button>`
+        )}
+
+        <div class="panel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ชื่อผู้ใช้</th>
+                  <th>ชื่อแสดงผล</th>
+                  <th>สิทธิ์</th>
+                  <th>สถานะ</th>
+                  <th>เข้าสู่ระบบล่าสุด</th>
+                  <th class="text-right">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${users.map(function(u) {
+                  return `
+                    <tr>
+                      <td>${escapeHtml(u.username)}</td>
+                      <td>${escapeHtml(u.name)}</td>
+                      <td>${roleText(u.role)}</td>
+                      <td>${u.status === 'Active'
+                        ? '<span class="badge badge-success">ใช้งาน</span>'
+                        : '<span class="badge badge-danger">ปิดใช้งาน</span>'}</td>
+                      <td>${u.lastLogin ? dateText(u.lastLogin) : '-'}</td>
+                      <td class="text-right">
+                        ${u.id !== AppState.user.id ? `
+                          <button class="btn btn-secondary"
+                            onclick="toggleUserStatus('${u.id}','${u.status === 'Active' ? 'Inactive' : 'Active'}')">
+                            ${u.status === 'Active' ? 'ปิดใช้งาน' : 'เปิดใช้งาน'}
+                          </button>
+                        ` : '<span class="muted">บัญชีปัจจุบัน</span>'}
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function openUserForm() {
+      openModal(
+        'เพิ่มผู้ใช้งาน',
+        `
+          <form id="userForm">
+            <div class="field">
+              <label>ชื่อผู้ใช้</label>
+              <input name="username" required autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label>ชื่อแสดงผล</label>
+              <input name="name" required>
+            </div>
+
+            <div class="field">
+              <label>รหัสผ่านเริ่มต้น</label>
+              <input name="password" type="password" minlength="8" required>
+            </div>
+
+            <div class="field">
+              <label>ระดับสิทธิ์</label>
+              <select name="role">
+                <option value="Staff">เจ้าหน้าที่</option>
+                <option value="Viewer">ผู้ดูข้อมูล</option>
+                <option value="Admin">ผู้ดูแลระบบ</option>
+              </select>
+            </div>
+          </form>
+        `,
+        `
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitUser()">สร้างบัญชี</button>
+        `
+      );
+    }
+
+    async function submitUser() {
+      const form = document.getElementById('userForm');
+
+      if (!form.reportValidity()) return;
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        await callApi('apiCreateUser', AppState.token, payload);
+        closeModal();
+        toast('สร้างผู้ใช้งานเรียบร้อย');
+        await renderUsers();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function toggleUserStatus(id, status) {
+      const confirmed = await confirmDialog(
+        'เปลี่ยนสถานะผู้ใช้งาน',
+        status === 'Active'
+          ? 'ต้องการเปิดใช้งานบัญชีนี้หรือไม่'
+          : 'ต้องการปิดใช้งานบัญชีนี้หรือไม่'
+      );
+
+      if (!confirmed) return;
+
+      try {
+        await callApi('apiSetUserStatus', AppState.token, id, status);
+        toast('เปลี่ยนสถานะเรียบร้อย');
+        await renderUsers();
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function renderAudit() {
+      if (AppState.user.role !== 'Admin') {
+        throw new Error('ไม่มีสิทธิ์เข้าถึงเมนูนี้');
+      }
+
+      const result = await callApi('apiGetAuditLogs', AppState.token, {
+        limit: 300
+      });
+
+      const rows = result.data || [];
+
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading('ประวัติการใช้งาน', 'รายการกิจกรรมที่บันทึกไว้ในระบบ')}
+
+        <div class="panel">
+          ${rows.length ? `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เวลา</th>
+                    <th>ผู้ใช้งาน</th>
+                    <th>กิจกรรม</th>
+                    <th>ประเภทข้อมูล</th>
+                    <th>รหัสรายการ</th>
+                    <th>รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(function(r) {
+                    return `
+                      <tr>
+                        <td>${dateText(r.timestamp)}</td>
+                        <td>${escapeHtml(r.username)}</td>
+                        <td>${escapeHtml(r.action)}</td>
+                        <td>${escapeHtml(r.entity)}</td>
+                        <td>${escapeHtml(r.recordId)}</td>
+                        <td>${escapeHtml(r.details)}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : emptyState('ยังไม่มีประวัติการใช้งาน')}
+        </div>
+      `;
+    }
+
+    function renderSettings() {
+      if (AppState.user.role !== 'Admin') {
+        document.getElementById('pageContent').innerHTML =
+          '<div class="notice error">ไม่มีสิทธิ์เข้าถึงเมนูนี้</div>';
+        return;
+      }
+
+      const s = AppState.settings;
+
+      document.getElementById('pageContent').innerHTML = `
+        ${pageHeading('ตั้งค่าระบบ', 'ข้อมูลกิจการและรูปแบบเอกสาร')}
+
+        <div class="panel settings-section">
+          <h3>ข้อมูลกิจการ</h3>
+
+          <form id="settingsForm">
+            <div class="field">
+              <label>ชื่อกิจการ</label>
+              <input name="businessName"
+                value="${escapeHtml(s.businessName || '')}">
+            </div>
+
+            <div class="field">
+              <label>ที่อยู่กิจการ</label>
+              <textarea name="businessAddress">${escapeHtml(s.businessAddress || '')}</textarea>
+            </div>
+
+            <div class="field">
+              <label>เบอร์โทรศัพท์</label>
+              <input name="businessPhone"
+                value="${escapeHtml(s.businessPhone || '')}">
+            </div>
+
+            <div class="field">
+              <label>เลขประจำตัวผู้เสียภาษี</label>
+              <input name="businessTaxId"
+                value="${escapeHtml(s.businessTaxId || '')}">
+            </div>
+
+            <div class="field">
+              <label>ฟอนต์เอกสาร</label>
+              <input name="documentFont"
+                value="Noto Sans Thai" readonly>
+            </div>
+
+            <div class="field">
+              <label>เดือนเริ่มต้นปีบัญชี</label>
+              <select name="fiscalYearStartMonth">
+                ${Array.from({length:12}, function(_, i) {
+                  const month = i + 1;
+                  return `
+                    <option value="${month}"
+                      ${Number(s.fiscalYearStartMonth || 1) === month ? 'selected' : ''}>
+                      ${new Date(2026, i, 1).toLocaleDateString('th-TH', {month:'long'})}
+                    </option>
+                  `;
+                }).join('')}
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-primary"
+                    onclick="saveSettings()">
+              ${icon('check', 17)} บันทึกการตั้งค่า
+            </button>
+          </form>
+        </div>
+
+        <div class="panel settings-section">
+          <h3>ตรวจสอบระบบ</h3>
+          <p class="muted">ตรวจสอบการเชื่อมต่อฐานข้อมูลและจำนวนรายการในแต่ละชีต</p>
+          <button class="btn btn-secondary" onclick="runHealthCheck()">
+            ${icon('refresh', 17)} ตรวจสอบสถานะระบบ
+          </button>
+          <div id="healthResult" style="margin-top:15px"></div>
+        </div>
+      `;
+    }
+
+    async function saveSettings() {
+      const form = document.getElementById('settingsForm');
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        await callApi('apiSaveSettings', AppState.token, payload);
+        AppState.settings = Object.assign({}, AppState.settings, payload);
+        toast('บันทึกการตั้งค่าเรียบร้อย');
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function runHealthCheck() {
+      try {
+        const result = await callApi('apiHealthCheck', AppState.token);
+
+        document.getElementById('healthResult').innerHTML = `
+          <div class="notice">
+            ฐานข้อมูล: <strong>${escapeHtml(result.database)}</strong><br>
+            เวลาเชื่อมต่อ: ${dateText(result.timestamp)}
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>ชีต</th><th>สถานะ</th><th class="text-right">จำนวนรายการ</th></tr>
+              </thead>
+              <tbody>
+                ${result.sheets.map(function(s) {
+                  return `
+                    <tr>
+                      <td>${escapeHtml(s.name)}</td>
+                      <td>${s.exists
+                        ? '<span class="badge badge-success">พร้อมใช้งาน</span>'
+                        : '<span class="badge badge-danger">ไม่พบชีต</span>'}</td>
+                      <td class="text-right">${Number(s.rows).toLocaleString('th-TH')}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    function openPasswordModal() {
+      openModal(
+        'เปลี่ยนรหัสผ่าน',
+        `
+          <form id="passwordForm">
+            <div class="field">
+              <label>รหัสผ่านเดิม</label>
+              <input type="password" name="oldPassword" required>
+            </div>
+            <div class="field">
+              <label>รหัสผ่านใหม่</label>
+              <input type="password" name="newPassword" minlength="8" required>
+            </div>
+            <div class="field">
+              <label>ยืนยันรหัสผ่านใหม่</label>
+              <input type="password" name="confirmPassword" minlength="8" required>
+            </div>
+          </form>
+        `,
+        `
+          <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+          <button class="btn btn-primary" onclick="submitPasswordChange()">
+            บันทึกรหัสผ่าน
+          </button>
+        `
+      );
+    }
+
+    async function submitPasswordChange() {
+      const form = document.getElementById('passwordForm');
+
+      if (!form.reportValidity()) return;
+
+      const oldPassword = form.elements.oldPassword.value;
+      const newPassword = form.elements.newPassword.value;
+      const confirmPassword = form.elements.confirmPassword.value;
+
+      if (newPassword !== confirmPassword) {
+        toast('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน', 'error');
+        return;
+      }
+
+      try {
+        await callApi(
+          'apiChangePassword',
+          AppState.token,
+          oldPassword,
+          newPassword
+        );
+
+        closeModal();
+        toast('เปลี่ยนรหัสผ่านเรียบร้อย');
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    async function createDocument(type, id) {
+      try {
+        const result = await callApi(
+          'apiCreateDocument',
+          AppState.token,
+          type,
+          id
+        );
+
+        openModal(
+          'สร้างเอกสารเรียบร้อย',
+          `
+            <div class="notice">
+              เอกสารถูกสร้างใน Google Docs แล้ว
+            </div>
+            <p>
+              <a href="${escapeHtml(result.documentUrl)}"
+                 target="_blank" rel="noopener">
+                เปิดเอกสาร
+              </a>
+            </p>
+          `,
+          `<button class="btn btn-primary" onclick="closeModal()">ปิด</button>`
+        );
+
+      } catch (error) {
+        toast(error.message, 'error');
+      }
+    }
+
+    function openModal(title, body, footer, large = false) {
+      const root = document.getElementById('modalRoot');
+
+      root.innerHTML = `
+        <div class="modal-backdrop" id="modalBackdrop"
+             onclick="if(event.target===this)closeModal()">
+          <div class="modal ${large ? 'modal-large' : ''}" role="dialog"
+               aria-modal="true" aria-label="${escapeHtml(title)}">
+
+            <div class="modal-header">
+              <h2>${escapeHtml(title)}</h2>
+              <button class="icon-button" onclick="closeModal()"
+                      aria-label="ปิดหน้าต่าง">
+                ${icon('close', 18)}
+              </button>
+            </div>
+
+            <div class="modal-body">${body}</div>
+
+            <div class="modal-footer">${footer}</div>
+          </div>
+        </div>
+      `;
+
+      document.body.style.overflow = 'hidden';
+
+      document.addEventListener('keydown', modalEscapeHandler);
+    }
+
+    function closeModal() {
+      document.getElementById('modalRoot').innerHTML = '';
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', modalEscapeHandler);
+    }
+
+    function modalEscapeHandler(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    }
+
+    function confirmDialog(title, message) {
+      return new Promise(function(resolve) {
+        openModal(
+          title,
+          `<p style="margin:0;color:#637187">${escapeHtml(message)}</p>`,
+          `
+            <button class="btn btn-secondary"
+                    id="confirmCancel">ยกเลิก</button>
+            <button class="btn btn-danger"
+                    id="confirmAccept">ยืนยัน</button>
+          `
+        );
+
+        document.getElementById('confirmCancel').onclick = function() {
+          closeModal();
+          resolve(false);
+        };
+
+        document.getElementById('confirmAccept').onclick = function() {
+          closeModal();
+          resolve(true);
+        };
+      });
+    }
+
+    document.getElementById('loginForm')
+      .addEventListener('submit', login);
+
+    document.querySelectorAll('.nav-item').forEach(function(button) {
+      button.addEventListener('click', function() {
+        navigate(button.dataset.page);
+      });
+    });
+
+    applyIcons();
+  </script>
+
+</body>
+</html>
