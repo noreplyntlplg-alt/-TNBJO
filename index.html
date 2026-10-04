@@ -24,8 +24,11 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- HTML to Canvas สำหรับเรนเดอร์ภาษาไทยเป็นภาพ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- HTML2Canvas: แปลงเอกสารภาษาไทยเป็นภาพก่อนพิมพ์ -->
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        crossorigin="anonymous"
+    ></script>
 
     <style>
         :root {
@@ -499,29 +502,17 @@
 
     <!-- Navigation -->
     <nav class="navigation no-print">
-        <button
-            class="btn active"
-            id="tabNew"
-            onclick="showTab('new')"
-        >
+        <button class="btn active" id="tabNew" onclick="showTab('new')">
             <i class="fa-solid fa-file-circle-plus"></i>
             ออกใบสั่งจ่าย
         </button>
 
-        <button
-            class="btn"
-            id="tabList"
-            onclick="showTab('list')"
-        >
+        <button class="btn" id="tabList" onclick="showTab('list')">
             <i class="fa-solid fa-list"></i>
             ทะเบียนรายการ
         </button>
 
-        <button
-            class="btn"
-            id="tabSettings"
-            onclick="showTab('settings')"
-        >
+        <button class="btn" id="tabSettings" onclick="showTab('settings')">
             <i class="fa-solid fa-gear"></i>
             ตั้งค่าหน่วยงาน
         </button>
@@ -574,21 +565,12 @@
                         <label for="payee">
                             ผู้รับเงิน / เจ้าหนี้ <span class="required">*</span>
                         </label>
-                        <input
-                            type="text"
-                            id="payee"
-                            maxlength="250"
-                            required
-                        >
+                        <input type="text" id="payee" maxlength="250" required>
                     </div>
 
                     <div class="field">
                         <label for="taxid">เลขประจำตัวผู้เสียภาษี / เลขบัตร</label>
-                        <input
-                            type="text"
-                            id="taxid"
-                            maxlength="30"
-                        >
+                        <input type="text" id="taxid" maxlength="30">
                     </div>
 
                     <div class="field">
@@ -606,11 +588,7 @@
                         <label for="description">
                             รายการ / เหตุผลการจ่าย <span class="required">*</span>
                         </label>
-                        <textarea
-                            id="description"
-                            maxlength="2000"
-                            required
-                        ></textarea>
+                        <textarea id="description" maxlength="2000" required></textarea>
                     </div>
 
                     <div class="field">
@@ -664,38 +642,22 @@
 
                 <div class="actions no-print">
 
-                    <button
-                        class="btn primary"
-                        type="submit"
-                        id="saveButton"
-                    >
+                    <button class="btn primary" type="submit" id="saveButton">
                         <i class="fa-solid fa-floppy-disk"></i>
                         บันทึกรายการ
                     </button>
 
-                    <button
-                        class="btn"
-                        type="button"
-                        onclick="clearForm()"
-                    >
+                    <button class="btn" type="button" onclick="clearForm()">
                         <i class="fa-solid fa-rotate-left"></i>
                         ล้างข้อมูล
                     </button>
 
-                    <button
-                        class="btn"
-                        type="button"
-                        onclick="previewDoc('voucher')"
-                    >
+                    <button class="btn" type="button" onclick="previewDoc('voucher')">
                         <i class="fa-solid fa-print"></i>
                         พิมพ์ใบสั่งจ่าย
                     </button>
 
-                    <button
-                        class="btn"
-                        type="button"
-                        onclick="previewDoc('cheque')"
-                    >
+                    <button class="btn" type="button" onclick="previewDoc('cheque')">
                         <i class="fa-solid fa-money-check"></i>
                         พิมพ์รายละเอียดเช็ค
                     </button>
@@ -718,7 +680,8 @@
                 <button
                     class="btn primary"
                     type="button"
-                    onclick="window.print()"
+                    onclick="printAsImage()"
+                    id="imagePrintButton"
                 >
                     <i class="fa-solid fa-print"></i>
                     พิมพ์ผ่านระบบ
@@ -745,11 +708,10 @@
             </div>
 
             <p class="muted no-print">
-                การพิมพ์ผ่านเบราว์เซอร์จะเปิดหน้าต่างพิมพ์ของอุปกรณ์
-                ส่วน Bluetooth โดยตรงรองรับเฉพาะเครื่องพิมพ์ที่รองรับ
-                Web Bluetooth และมีช่องทาง GATT สำหรับเขียนข้อมูล
-                เครื่องพิมพ์ Bluetooth Classic/SPP อาจต้องใช้ไดรเวอร์
-                หรือแอปตัวกลางของผู้ผลิต
+                การพิมพ์ผ่านระบบจะเรนเดอร์เอกสารภาษาไทยเป็นภาพก่อนพิมพ์
+                เพื่อหลีกเลี่ยงปัญหาชุดรหัสภาษาไทยของเครื่องพิมพ์
+                กรุณาเลือกเครื่องพิมพ์ PHOMARK JHP-A1 และกระดาษ 80 มม.
+                การพิมพ์ผ่าน Bluetooth BLE ยังขึ้นอยู่กับโปรโตคอลของเครื่องพิมพ์
             </p>
 
         </div>
@@ -799,20 +761,12 @@
 
             <div class="actions no-print" style="margin-top:0;margin-bottom:14px">
 
-                <button
-                    class="btn"
-                    type="button"
-                    onclick="loadRecords()"
-                >
+                <button class="btn" type="button" onclick="loadRecords()">
                     <i class="fa-solid fa-rotate"></i>
                     โหลดข้อมูลล่าสุด
                 </button>
 
-                <button
-                    class="btn"
-                    type="button"
-                    onclick="exportCsv()"
-                >
+                <button class="btn" type="button" onclick="exportCsv()">
                     <i class="fa-solid fa-file-csv"></i>
                     ส่งออก CSV
                 </button>
@@ -871,20 +825,12 @@
 
             <div class="actions">
 
-                <button
-                    class="btn primary"
-                    type="button"
-                    onclick="saveOrg()"
-                >
+                <button class="btn primary" type="button" onclick="saveOrg()">
                     <i class="fa-solid fa-floppy-disk"></i>
                     บันทึกการตั้งค่า
                 </button>
 
-                <button
-                    class="btn"
-                    type="button"
-                    onclick="openSpreadsheet()"
-                >
+                <button class="btn" type="button" onclick="openSpreadsheet()">
                     <i class="fa-brands fa-google"></i>
                     เปิด Google Sheets
                 </button>
@@ -911,9 +857,11 @@
    CONFIGURATION
    ===================================================== */
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxMHl5gxxBUD0vrJ__NiODP_dChkNRJZlqKVK4HyixlPPVGSlAjcI0eh1q-95n6n_ZC/exec";
+const API_URL =
+    "https://script.google.com/macros/s/AKfycbxMHl5gxxBUD0vrJ__NiODP_dChkNRJZlqKVK4HyixlPPVGSlAjcI0eh1q-95n6n_ZC/exec";
 
-const API_KEY = "TNBJO-2026-PV-8fK29xQ7mL4vR6pW3zN1aB5c";
+const API_KEY =
+    "TNBJO-2026-PV-8fK29xQ7mL4vR6pW3zN1aB5c";
 
 /* =====================================================
    APPLICATION STATE
@@ -923,6 +871,7 @@ let records = [];
 let settings = {};
 let currentDocumentType = "voucher";
 let apiBusy = false;
+let printBusy = false;
 
 /* =====================================================
    BASIC HELPERS
@@ -992,14 +941,9 @@ function setBusy(value) {
 function api(params = {}) {
     return new Promise((resolve, reject) => {
 
-        if (
-            !API_URL ||
-            API_URL.includes("PASTE_YOUR_APPS_SCRIPT")
-        ) {
+        if (!API_URL || !API_URL.includes("/exec")) {
             reject(
-                new Error(
-                    "กรุณากำหนด API_URL ของ Google Apps Script ก่อนใช้งาน"
-                )
+                new Error("กรุณาตรวจสอบ API_URL ของ Google Apps Script")
             );
 
             return;
@@ -1016,15 +960,17 @@ function api(params = {}) {
         let finished = false;
 
         const timeout = setTimeout(() => {
-            finish(
-                new Error("หมดเวลารอการตอบกลับจาก API")
-            );
+            finish(new Error("หมดเวลารอการตอบกลับจาก API"));
         }, 30000);
 
         function cleanup() {
             clearTimeout(timeout);
 
-            delete window[callbackName];
+            try {
+                delete window[callbackName];
+            } catch (error) {
+                window[callbackName] = undefined;
+            }
 
             if (script.parentNode) {
                 script.parentNode.removeChild(script);
@@ -1048,9 +994,7 @@ function api(params = {}) {
         window[callbackName] = (data) => {
             if (!data || data.ok !== true) {
                 finish(
-                    new Error(
-                        data?.error || "API ไม่สามารถดำเนินการได้"
-                    )
+                    new Error(data?.error || "API ไม่สามารถดำเนินการได้")
                 );
 
                 return;
@@ -1122,8 +1066,7 @@ async function loadRecords() {
 
         settings = response.settings || {};
 
-        $("org").value =
-            settings.org || "";
+        $("org").value = settings.org || "";
 
         renderList();
 
@@ -1148,10 +1091,7 @@ function showTab(tabName) {
     const tabs = ["new", "list", "settings"];
 
     tabs.forEach((name) => {
-        $(name).classList.toggle(
-            "hidden",
-            name !== tabName
-        );
+        $(name).classList.toggle("hidden", name !== tabName);
     });
 
     ["New", "List", "Settings"].forEach((name) => {
@@ -1230,7 +1170,12 @@ function validateForm() {
     }
 
     if (!(Number(data.amount) > 0)) {
-        Swal.fire("จำนวนเงินไม่ถูกต้อง", "กรุณาระบุจำนวนเงินมากกว่า 0", "warning");
+        Swal.fire(
+            "จำนวนเงินไม่ถูกต้อง",
+            "กรุณาระบุจำนวนเงินมากกว่า 0",
+            "warning"
+        );
+
         return false;
     }
 
@@ -1253,7 +1198,8 @@ $("paymentForm").addEventListener("submit", async (event) => {
             ? "ยืนยันแก้ไขรายการ?"
             : "ยืนยันบันทึกรายการ?",
 
-        text: "โปรดตรวจสอบผู้รับเงิน รายการ และจำนวนเงินก่อนดำเนินการ",
+        text:
+            "โปรดตรวจสอบผู้รับเงิน รายการ และจำนวนเงินก่อนดำเนินการ",
 
         icon: "question",
 
@@ -1342,8 +1288,7 @@ function renderList() {
     $("totalCount").textContent =
         filtered.length.toLocaleString("th-TH");
 
-    $("totalAmount").textContent =
-        money(total);
+    $("totalAmount").textContent = money(total);
 
     $("pendingCount").textContent =
         pending.toLocaleString("th-TH");
@@ -1650,7 +1595,11 @@ function bahtText(amount) {
 
             if (digit === 0) continue;
 
-            if (position === 0 && digit === 1 && numberString.length > 1) {
+            if (
+                position === 0 &&
+                digit === 1 &&
+                numberString.length > 1
+            ) {
                 output += "เอ็ด";
             } else if (position === 1 && digit === 1) {
                 output += "สิบ";
@@ -1849,400 +1798,358 @@ function printRecord(id, type) {
 
     $("printPanel").classList.remove("hidden");
 
-    window.print();
-}
-
-/* =====================================================
-   THAI IMAGE PRINT CONFIGURATION
-   ===================================================== */
-
-/*
- * PHOMARK JHP-A1
- * Paper width: 80mm
- *
- * 576 dots เป็นความกว้างที่พบได้ทั่วไป
- * ในเครื่องพิมพ์ความร้อน 80mm ที่ 203 DPI
- *
- * หากเครื่องพิมพ์ของคุณรองรับความกว้างอื่น
- * ให้ปรับค่าตามคู่มือรุ่นจริง
- */
-
-const THERMAL_PRINT_WIDTH = 576;
-
-/*
- * ขนาดข้อมูลต่อ BLE write
- */
-
-const THERMAL_BLE_CHUNK_SIZE = 180;
-
-/*
- * เวลาหน่วงระหว่าง packet
- */
-
-const THERMAL_BLE_DELAY = 8;
-
-/* =====================================================
-   WAIT HELPER
-   ===================================================== */
-
-function waitMilliseconds(milliseconds) {
-    return new Promise(resolve => {
-        setTimeout(resolve, milliseconds);
+    $("printPanel").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
     });
-}
-
-/* =====================================================
-   WAIT FOR FONT
-   ===================================================== */
-
-async function waitForThaiFonts() {
-
-    if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-    }
 
     /*
-     * ตรวจสอบฟอนต์ Sarabun
+     * ไม่เรียก window.print() ทันที
+     * ให้ผู้ใช้กดปุ่มพิมพ์ภาพจาก Preview
+     * เพื่อป้องกันการพิมพ์ก่อน Font/Preview พร้อม
      */
-
-    if (document.fonts && document.fonts.check) {
-
-        const loaded = document.fonts.check(
-            '12px "Sarabun"'
-        );
-
-        if (!loaded) {
-            await waitMilliseconds(500);
-        }
-    }
-
-    await new Promise(resolve => {
-        requestAnimationFrame(() => {
-            requestAnimationFrame(resolve);
-        });
-    });
 }
 
 /* =====================================================
-   RENDER DOCUMENT TO CANVAS
+   RENDER THAI DOCUMENT AS IMAGE AND PRINT
+   PHOMARK JHP-A1 - 80MM
    ===================================================== */
 
-async function renderPrintAreaToCanvas() {
+async function printAsImage() {
+
+    if (printBusy) return;
+
+    const printArea = $("printArea");
+
+    if (!printArea || !printArea.innerText.trim()) {
+        Swal.fire({
+            icon: "warning",
+            title: "ไม่มีเอกสารสำหรับพิมพ์",
+            text: "กรุณาสร้างตัวอย่างเอกสารก่อนพิมพ์"
+        });
+
+        return;
+    }
 
     if (typeof html2canvas !== "function") {
-        throw new Error(
-            "ไม่พบไลบรารี html2canvas กรุณาตรวจสอบอินเทอร์เน็ต"
-        );
+        Swal.fire({
+            icon: "error",
+            title: "ไม่สามารถโหลดระบบเรนเดอร์ภาพ",
+            text:
+                "กรุณาตรวจสอบอินเทอร์เน็ตและโหลดหน้าเว็บใหม่"
+        });
+
+        return;
     }
 
-    const element = $("printArea");
+    printBusy = true;
 
-    if (!element || !element.innerText.trim()) {
-        throw new Error(
-            "ไม่มีเอกสารสำหรับพิมพ์ กรุณาสร้างตัวอย่างเอกสารก่อน"
-        );
+    const printButton = $("imagePrintButton");
+
+    if (printButton) {
+        printButton.disabled = true;
+        printButton.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> กำลังสร้างภาพเอกสาร...';
     }
 
-    await waitForThaiFonts();
+    let printWindow = null;
 
-    const originalWidth =
-        element.getBoundingClientRect().width;
+    try {
 
-    if (!originalWidth) {
-        throw new Error(
-            "ไม่สามารถอ่านขนาดเอกสารได้ กรุณาเปิดตัวอย่างเอกสารก่อนพิมพ์"
+        /*
+         * เปิดหน้าต่างก่อนเริ่มงาน async
+         * เพื่อหลีกเลี่ยง Popup Blocker
+         */
+
+        printWindow = window.open(
+            "",
+            "_blank",
+            "width=500,height=800"
         );
-    }
 
-    /*
-     * ใช้ความกว้างเอกสารเดิม
-     * และเพิ่มความละเอียดของ Canvas ให้ใกล้ 576 dots
-     */
-
-    const scale =
-        THERMAL_PRINT_WIDTH / originalWidth;
-
-    const canvas = await html2canvas(element, {
-
-        backgroundColor: "#ffffff",
-
-        scale: scale,
-
-        useCORS: true,
-
-        allowTaint: false,
-
-        logging: false,
-
-        width: originalWidth,
-
-        windowWidth: Math.max(
-            document.documentElement.clientWidth,
-            originalWidth
-        ),
-
-        scrollX: 0,
-
-        scrollY: 0,
-
-        onclone: function(clonedDocument) {
-
-            const clonedElement =
-                clonedDocument.getElementById("printArea");
-
-            if (clonedElement) {
-
-                clonedElement.style.backgroundColor = "#ffffff";
-
-                clonedElement.style.color = "#111111";
-
-                clonedElement.style.display = "block";
-
-                clonedElement.style.visibility = "visible";
-            }
+        if (!printWindow) {
+            throw new Error(
+                "เบราว์เซอร์บล็อกหน้าต่างพิมพ์ กรุณาอนุญาต Pop-up"
+            );
         }
-    });
 
-    if (!canvas.width || !canvas.height) {
-        throw new Error(
-            "ไม่สามารถแปลงเอกสารเป็นภาพได้"
-        );
-    }
+        printWindow.document.open();
 
-    if (canvas.height > 65000) {
-        throw new Error(
-            "เอกสารยาวเกินขีดจำกัดการส่งภาพของเครื่องพิมพ์"
-        );
-    }
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="th">
+            <head>
+                <meta charset="UTF-8">
 
-    return canvas;
-}
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1"
+                >
 
-/* =====================================================
-   CANVAS TO ESC/POS RASTER
-   ===================================================== */
+                <title>TNBJO - Print</title>
 
-function canvasToEscPosRaster(canvas) {
+                <style>
+                    * {
+                        box-sizing: border-box;
+                    }
 
-    const context = canvas.getContext("2d", {
-        willReadFrequently: true
-    });
+                    html,
+                    body {
+                        width: 80mm;
+                        min-width: 80mm;
+                        margin: 0;
+                        padding: 0;
+                        background: #ffffff;
+                    }
 
-    const width = canvas.width;
-    const height = canvas.height;
+                    body {
+                        font-family: Arial, sans-serif;
+                    }
 
-    const bytesPerRow = Math.ceil(width / 8);
+                    .page {
+                        width: 80mm;
+                        margin: 0;
+                        padding: 0;
+                        background: #ffffff;
+                    }
 
-    const imageData = context.getImageData(
-        0,
-        0,
-        width,
-        height
-    );
+                    .page img {
+                        display: block;
+                        width: 80mm;
+                        height: auto;
+                        max-width: 80mm;
+                        margin: 0;
+                        padding: 0;
+                        border: 0;
+                    }
 
-    const pixels = imageData.data;
+                    @page {
+                        size: 80mm auto;
+                        margin: 0;
+                    }
 
-    const rasterLength =
-        8 + bytesPerRow * height;
+                    @media print {
+                        html,
+                        body {
+                            width: 80mm !important;
+                            min-width: 80mm !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
 
-    const raster = new Uint8Array(rasterLength);
+                        .page {
+                            width: 80mm !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
 
-    /*
-     * ESC/POS Raster Bit Image:
-     *
-     * GS v 0 m xL xH yL yH
-     */
+                        .page img {
+                            width: 80mm !important;
+                            height: auto !important;
+                            max-width: 80mm !important;
+                        }
+                    }
+                </style>
+            </head>
 
-    raster[0] = 0x1D;
-    raster[1] = 0x76;
-    raster[2] = 0x30;
-    raster[3] = 0x00;
+            <body>
+                <div class="page" id="imagePage"></div>
+            </body>
+            </html>
+        `);
 
-    raster[4] = bytesPerRow & 0xFF;
-    raster[5] = (bytesPerRow >> 8) & 0xFF;
+        printWindow.document.close();
 
-    raster[6] = height & 0xFF;
-    raster[7] = (height >> 8) & 0xFF;
+        /*
+         * รอโหลดฟอนต์ภาษาไทยก่อนเรนเดอร์
+         */
 
-    let outputIndex = 8;
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
 
-    for (let y = 0; y < height; y++) {
+        /*
+         * เรนเดอร์เฉพาะพื้นที่เอกสาร
+         * ไม่เปลี่ยน HTML ของเอกสารต้นฉบับ
+         */
 
-        for (let xByte = 0; xByte < bytesPerRow; xByte++) {
+        const canvas = await html2canvas(printArea, {
 
-            let byteValue = 0;
+            scale: 3,
 
-            for (let bit = 0; bit < 8; bit++) {
+            backgroundColor: "#ffffff",
 
-                const x = xByte * 8 + bit;
+            useCORS: true,
 
-                if (x >= width) continue;
+            allowTaint: false,
 
-                const pixelIndex =
-                    (y * width + x) * 4;
+            logging: false,
 
-                const red = pixels[pixelIndex];
+            imageTimeout: 15000,
 
-                const green = pixels[pixelIndex + 1];
+            scrollX: 0,
 
-                const blue = pixels[pixelIndex + 2];
+            scrollY: -window.scrollY,
 
-                const alpha = pixels[pixelIndex + 3];
+            windowWidth: Math.max(
+                document.documentElement.clientWidth,
+                800
+            ),
 
-                const gray = alpha === 0
-                    ? 255
-                    : (
-                        0.299 * red +
-                        0.587 * green +
-                        0.114 * blue
-                    );
+            onclone: function(clonedDocument) {
 
-                /*
-                 * แปลงสีเป็นภาพขาวดำ
-                 *
-                 * ค่าต่ำกว่า 180 = จุดดำ
-                 * ค่าสูงกว่าหรือเท่ากับ 180 = สีขาว
-                 */
+                const clonedArea =
+                    clonedDocument.getElementById("printArea");
 
-                if (gray < 180) {
-                    byteValue |= (0x80 >> bit);
+                if (clonedArea) {
+
+                    clonedArea.style.display = "block";
+
+                    clonedArea.style.visibility = "visible";
+
+                    clonedArea.style.width = "80mm";
+
+                    clonedArea.style.maxWidth = "80mm";
+
+                    clonedArea.style.margin = "0 auto";
+
+                    clonedArea.style.padding = "4mm";
+
+                    clonedArea.style.background = "#ffffff";
+
+                    clonedArea.style.color = "#111111";
+
+                    clonedArea.style.fontFamily =
+                        '"Sarabun", sans-serif';
+
+                    clonedArea.style.fontSize = "12px";
+
+                    clonedArea.style.lineHeight = "1.55";
+
+                    clonedArea.style.overflow = "visible";
+
+                    clonedArea.style.height = "auto";
+
+                    clonedArea.style.maxHeight = "none";
                 }
             }
+        });
 
-            raster[outputIndex++] = byteValue;
-        }
-    }
-
-    return raster;
-}
-
-/* =====================================================
-   BLE SEND DATA
-   ===================================================== */
-
-async function sendBleData(characteristic, data) {
-
-    if (!characteristic || !data) {
-        throw new Error(
-            "ข้อมูลหรือช่องทางส่งข้อมูลเครื่องพิมพ์ไม่ถูกต้อง"
-        );
-    }
-
-    const canWrite =
-        characteristic.properties.write;
-
-    const canWriteWithoutResponse =
-        characteristic.properties.writeWithoutResponse;
-
-    if (!canWrite && !canWriteWithoutResponse) {
-        throw new Error(
-            "BLE characteristic ไม่รองรับการเขียนข้อมูล"
-        );
-    }
-
-    for (
-        let offset = 0;
-        offset < data.length;
-        offset += THERMAL_BLE_CHUNK_SIZE
-    ) {
-
-        const end = Math.min(
-            offset + THERMAL_BLE_CHUNK_SIZE,
-            data.length
-        );
-
-        const chunk = data.slice(offset, end);
-
-        if (canWriteWithoutResponse) {
-
-            await characteristic.writeValueWithoutResponse(
-                chunk
-            );
-
-        } else {
-
-            await characteristic.writeValue(chunk);
+        if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
+            throw new Error("ไม่สามารถสร้างภาพเอกสารได้");
         }
 
-        await waitMilliseconds(THERMAL_BLE_DELAY);
-    }
-}
+        /*
+         * สร้าง PNG จาก Canvas
+         * อักษรไทยกลายเป็นภาพ ไม่ต้องอาศัย Font ในเครื่องพิมพ์
+         */
 
-/* =====================================================
-   FIND BLE PRINT CHARACTERISTIC
-   ===================================================== */
+        const imageData = canvas.toDataURL("image/png");
 
-async function findPrinterCharacteristic(server) {
+        const image = printWindow.document.createElement("img");
 
-    const services = await server.getPrimaryServices();
+        image.alt = "TNBJO Thai Payment Document";
 
-    let characteristic = null;
+        image.src = imageData;
 
-    for (const service of services) {
+        image.style.width = "80mm";
 
-        let characteristics = [];
+        image.style.height = "auto";
 
-        try {
+        image.style.display = "block";
 
-            characteristics =
-                await service.getCharacteristics();
+        const imagePage =
+            printWindow.document.getElementById("imagePage");
 
-        } catch (error) {
+        imagePage.appendChild(image);
 
-            continue;
-        }
+        /*
+         * รอภาพโหลดจริงก่อนสั่งพิมพ์
+         */
 
-        for (const item of characteristics) {
+        await new Promise((resolve, reject) => {
 
-            if (
-                item.properties.write ||
-                item.properties.writeWithoutResponse
-            ) {
-
-                characteristic = item;
-
-                break;
+            if (image.complete && image.naturalWidth > 0) {
+                resolve();
+                return;
             }
+
+            image.onload = resolve;
+
+            image.onerror = () => {
+                reject(
+                    new Error("ไม่สามารถโหลดภาพเอกสารสำหรับพิมพ์")
+                );
+            };
+        });
+
+        /*
+         * รอ Browser คำนวณ Layout
+         */
+
+        await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+        printWindow.focus();
+
+        printWindow.print();
+
+        Swal.fire({
+            icon: "success",
+            title: "สร้างภาพเอกสารสำเร็จ",
+            text:
+                "กรุณาเลือก PHOMARK JHP-A1 " +
+                "ตั้งค่ากระดาษ 80 มม. และตรวจสอบตัวอย่างก่อนพิมพ์"
+        });
+
+    } catch (error) {
+
+        if (printWindow && !printWindow.closed) {
+            printWindow.close();
         }
 
-        if (characteristic) {
-            break;
+        Swal.fire({
+            icon: "error",
+            title: "พิมพ์เอกสารไม่สำเร็จ",
+            text:
+                error.message ||
+                "เกิดข้อผิดพลาดระหว่างสร้างภาพเอกสาร"
+        });
+
+    } finally {
+
+        printBusy = false;
+
+        if (printButton) {
+            printButton.disabled = false;
+
+            printButton.innerHTML =
+                '<i class="fa-solid fa-print"></i> พิมพ์ผ่านระบบ';
         }
     }
-
-    if (!characteristic) {
-
-        throw new Error(
-            "ไม่พบช่องทาง BLE สำหรับส่งข้อมูลพิมพ์ " +
-            "เครื่องอาจใช้ Bluetooth Classic/SPP " +
-            "หรือ BLE โปรโตคอลเฉพาะของผู้ผลิต"
-        );
-    }
-
-    return characteristic;
 }
 
 /* =====================================================
-   BLUETOOTH IMAGE PRINT
+   BLUETOOTH BLE PRINT
    ===================================================== */
 
 async function printBluetooth() {
-
     if (!navigator.bluetooth) {
-
         Swal.fire({
             icon: "info",
             title: "เบราว์เซอร์ไม่รองรับ Web Bluetooth",
             text:
                 "กรุณาใช้ Chrome หรือ Edge ที่รองรับ BLE " +
-                "หรือพิมพ์ผ่านหน้าต่างพิมพ์ของระบบ"
+                "หรือพิมพ์ผ่านปุ่มพิมพ์ผ่านระบบ"
         });
 
         return;
     }
 
     if (!$("printArea").innerText.trim()) {
-
         Swal.fire(
             "ไม่มีเอกสาร",
             "กรุณาสร้างตัวอย่างเอกสารก่อนพิมพ์",
@@ -2252,183 +2159,113 @@ async function printBluetooth() {
         return;
     }
 
-    if (typeof html2canvas !== "function") {
+    Swal.fire({
+        icon: "warning",
+        title: "Bluetooth BLE",
+        text:
+            "ฟังก์ชันนี้ส่งข้อมูลข้อความดิบ " +
+            "จึงอาจยังแสดงภาษาไทยผิดกับ PHOMARK JHP-A1 " +
+            "แนะนำให้ใช้ปุ่มพิมพ์ผ่านระบบซึ่งแปลงเอกสารเป็นภาพ",
+        showCancelButton: true,
+        confirmButtonText: "ดำเนินการต่อ",
+        cancelButtonText: "ยกเลิก"
+    }).then(async (result) => {
 
-        Swal.fire({
-            icon: "error",
-            title: "ไม่พบระบบแปลงภาพ",
-            text:
-                "กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต " +
-                "และโหลดหน้าเว็บใหม่"
-        });
+        if (!result.isConfirmed) return;
 
-        return;
-    }
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [
+                    "000018f0-0000-1000-8000-00805f9b34fb"
+                ]
+            });
 
-    let device = null;
+            const server = await device.gatt.connect();
 
-    try {
+            const services = await server.getPrimaryServices();
 
-        Swal.fire({
-            title: "กำลังเตรียมเอกสาร",
-            html:
-                "กำลังโหลดฟอนต์ภาษาไทยและแปลงเอกสารเป็นภาพ",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => Swal.showLoading()
-        });
+            let characteristic = null;
 
-        /*
-         * 1. เรนเดอร์เอกสารเป็นภาพ
-         */
+            for (const service of services) {
+                try {
+                    const characteristics =
+                        await service.getCharacteristics();
 
-        const canvas =
-            await renderPrintAreaToCanvas();
+                    for (const item of characteristics) {
+                        if (
+                            item.properties.write ||
+                            item.properties.writeWithoutResponse
+                        ) {
+                            characteristic = item;
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    // ข้าม Service ที่ไม่อนุญาตให้อ่าน
+                }
 
-        /*
-         * 2. แปลงภาพเป็น ESC/POS Raster
-         */
+                if (characteristic) break;
+            }
 
-        const rasterData =
-            canvasToEscPosRaster(canvas);
+            if (!characteristic) {
+                throw new Error(
+                    "ไม่พบ BLE characteristic สำหรับส่งข้อมูลพิมพ์"
+                );
+            }
 
-        /*
-         * 3. ให้ผู้ใช้เลือกเครื่องพิมพ์
-         */
+            const textContent =
+                $("printArea").innerText.replace(/\n/g, "\r\n") +
+                "\r\n\r\n";
 
-        Swal.update({
-            title: "เลือกเครื่องพิมพ์",
-            html:
-                "กรุณาเลือกเครื่องพิมพ์ PHOMARK JHP-A1"
-        });
+            const bytes =
+                new TextEncoder().encode(textContent);
 
-        device = await navigator.bluetooth.requestDevice({
+            const chunkSize = 180;
 
-            acceptAllDevices: true,
+            for (
+                let index = 0;
+                index < bytes.length;
+                index += chunkSize
+            ) {
+                const chunk = bytes.slice(
+                    index,
+                    index + chunkSize
+                );
 
-            optionalServices: [
-                "000018f0-0000-1000-8000-00805f9b34fb"
-            ]
-        });
+                if (characteristic.properties.writeWithoutResponse) {
+                    await characteristic.writeValueWithoutResponse(chunk);
+                } else {
+                    await characteristic.writeValue(chunk);
+                }
+            }
 
-        Swal.update({
-            title: "กำลังเชื่อมต่อ",
-            html: "กำลังเชื่อมต่อเครื่องพิมพ์..."
-        });
+            Swal.fire({
+                icon: "info",
+                title: "ส่งข้อมูลแล้ว",
+                text:
+                    "กรุณาตรวจสอบภาษาไทยที่พิมพ์ออกมา " +
+                    "หากยังผิด ให้ใช้ปุ่มพิมพ์ผ่านระบบ"
+            });
 
-        const server = await device.gatt.connect();
-
-        /*
-         * 4. ค้นหา BLE characteristic ที่เขียนได้
-         */
-
-        const characteristic =
-            await findPrinterCharacteristic(server);
-
-        Swal.update({
-            title: "กำลังส่งเอกสาร",
-            html:
-                "กำลังส่งภาพภาษาไทยไปยังเครื่องพิมพ์ " +
-                "กรุณาอย่าปิดหน้าต่างนี้"
-        });
-
-        /*
-         * 5. Initialize Printer
-         */
-
-        await sendBleData(
-            characteristic,
-            new Uint8Array([
-                0x1B,
-                0x40
-            ])
-        );
-
-        /*
-         * 6. ส่งภาพเอกสาร
-         */
-
-        await sendBleData(
-            characteristic,
-            rasterData
-        );
-
-        /*
-         * 7. ป้อนกระดาษ 4 บรรทัด
-         */
-
-        await sendBleData(
-            characteristic,
-            new Uint8Array([
-                0x1B,
-                0x64,
-                0x04
-            ])
-        );
-
-        /*
-         * 8. คำสั่งตัดกระดาษ
-         *
-         * GS V 0
-         *
-         * หากเครื่องไม่มีชุดตัดกระดาษ
-         * คำสั่งนี้อาจไม่มีผล
-         */
-
-        await sendBleData(
-            characteristic,
-            new Uint8Array([
-                0x1D,
-                0x56,
-                0x00
-            ])
-        );
-
-        if (device.gatt.connected) {
-            device.gatt.disconnect();
+        } catch (error) {
+            Swal.fire({
+                icon: "warning",
+                title: "เชื่อมต่อหรือพิมพ์ไม่สำเร็จ",
+                text: error.message
+            });
         }
-
-        Swal.fire({
-            icon: "success",
-            title: "ส่งข้อมูลพิมพ์แล้ว",
-            html:
-                "ส่งเอกสารในรูปแบบภาพขาวดำเรียบร้อยแล้ว<br>" +
-                "กรุณาตรวจสอบภาษาไทยและตำแหน่งการพิมพ์จริง"
-        });
-
-    } catch (error) {
-
-        if (
-            device &&
-            device.gatt &&
-            device.gatt.connected
-        ) {
-            device.gatt.disconnect();
-        }
-
-        Swal.fire({
-            icon: "error",
-            title: "เชื่อมต่อหรือพิมพ์ไม่สำเร็จ",
-            text:
-                error.message ||
-                "เกิดข้อผิดพลาดในการส่งข้อมูลไปยังเครื่องพิมพ์"
-        });
-    }
+    });
 }
-
-/* =====================================================
-   CUT PAPER INFORMATION
-   ===================================================== */
 
 function cutPaperHint() {
     Swal.fire({
         icon: "info",
         title: "ข้อจำกัดการตัดกระดาษ",
         text:
-            "คำสั่ง ESC/POS ใช้ได้เมื่อเครื่องพิมพ์รองรับ " +
-            "และรับคำสั่งผ่านช่องทาง BLE write เท่านั้น " +
-            "หากเป็น Bluetooth Classic/SPP อาจต้องใช้ไดรเวอร์ " +
-            "หรือแอปตัวกลางของผู้ผลิต"
+            "การพิมพ์ภาพผ่านหน้าต่างพิมพ์จะใช้การตั้งค่าของไดรเวอร์ " +
+            "หากต้องการตัดกระดาษอัตโนมัติ ต้องเปิดตัวเลือกตัดกระดาษ " +
+            "ในไดรเวอร์หรือใช้คำสั่ง ESC/POS ที่เครื่องรองรับ"
     });
 }
 
@@ -2478,7 +2315,9 @@ async function openSpreadsheet() {
         });
 
         if (!response.spreadsheetUrl) {
-            throw new Error("API ไม่ได้ส่ง URL ของ Google Sheets กลับมา");
+            throw new Error(
+                "API ไม่ได้ส่ง URL ของ Google Sheets กลับมา"
+            );
         }
 
         window.open(
@@ -2548,11 +2387,6 @@ function exportCsv() {
     function csvCell(value) {
         let text = String(value ?? "");
 
-        /*
-         * ป้องกัน Spreadsheet ตีความข้อมูลที่ขึ้นต้นด้วย
-         * เครื่องหมายสูตรเป็นสูตรโดยไม่ตั้งใจ
-         */
-
         if (/^[=+\-@]/.test(text)) {
             text = "'" + text;
         }
@@ -2589,7 +2423,9 @@ function exportCsv() {
 
     link.remove();
 
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 1000);
 }
 
 /* =====================================================
@@ -2603,4 +2439,4 @@ initialize();
 </script>
 
 </body>
-</html>
+                    </html>
