@@ -1,1 +1,8902 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+  <title>TNBJO Payment Order & Cheque System</title>
+
+  <meta name="description" content="ระบบออกใบสั่งจ่ายและเช็ค Powered by TNBJO">
+  <meta name="theme-color" content="#1f2937">
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- TH Sarabun PSK / fallback -->
+  <style>
+    @font-face {
+      font-family: "TH Sarabun PSK";
+      src: local("TH Sarabun PSK");
+    }
+
+    html,
+    body,
+    button,
+    input,
+    textarea,
+    select,
+    table {
+      font-family: "TH Sarabun PSK", "TH Sarabun New", Tahoma, sans-serif;
+    }
+  </style>
+
+  <!--
+    GitHub Pages:
+    โหลด style.html จากไฟล์ภายนอก
+    เพื่อให้ยังคงมีเพียง 3 ไฟล์:
+      1. index.html
+      2. style.html
+      3. Code.gs
+  -->
+  <script>
+    const STYLE_FILE = "style.html";
+
+    document.addEventListener("DOMContentLoaded", async function () {
+      try {
+        const response = await fetch(STYLE_FILE, {
+          cache: "no-cache"
+        });
+
+        if (!response.ok) {
+          throw new Error("ไม่สามารถโหลด style.html ได้");
+        }
+
+        const css = await response.text();
+
+        const style = document.createElement("style");
+        style.id = "external-style";
+        style.textContent = css;
+
+        document.head.appendChild(style);
+
+      } catch (error) {
+        console.error(error);
+
+        Swal.fire({
+          icon: "warning",
+          title: "ไม่สามารถโหลดรูปแบบเว็บไซต์",
+          text: "กรุณาตรวจสอบว่า style.html อยู่โฟลเดอร์เดียวกับ index.html",
+          confirmButtonText: "ตกลง"
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <!-- =========================================================
+       APPLICATION
+  ========================================================== -->
+
+  <div id="app">
+
+    <!-- =======================================================
+         SIDEBAR
+    ======================================================== -->
+
+    <aside id="sidebar" class="sidebar">
+
+      <div class="sidebar-header">
+
+        <div class="brand-mark">
+          <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+
+        <div class="brand-text">
+
+          <div class="brand-name">
+            TNBJO
+          </div>
+
+          <div class="brand-subtitle">
+            Payment System
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="sidebar-close"
+          onclick="App.toggleSidebar(false)"
+          aria-label="ปิดเมนู"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+      </div>
+
+
+      <div class="sidebar-scroll">
+
+        <div class="menu-section-title">
+          ระบบหลัก
+        </div>
+
+        <button
+          class="menu-item active"
+          data-page="dashboard"
+          onclick="App.navigate('dashboard')"
+        >
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Dashboard</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="payment-orders"
+          onclick="App.navigate('payment-orders')"
+        >
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>ใบสั่งจ่าย</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="cheques"
+          onclick="App.navigate('cheques')"
+        >
+          <i class="fa-solid fa-money-check-dollar"></i>
+          <span>เช็ค</span>
+        </button>
+
+
+        <div class="menu-section-title">
+          จัดการข้อมูล
+        </div>
+
+
+        <button
+          class="menu-item"
+          data-page="payees"
+          onclick="App.navigate('payees')"
+        >
+          <i class="fa-solid fa-users"></i>
+          <span>ผู้รับเงิน</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="print"
+          onclick="App.navigate('print')"
+        >
+          <i class="fa-solid fa-print"></i>
+          <span>พิมพ์เอกสาร</span>
+        </button>
+
+
+        <div class="menu-section-title">
+          รายงานและตรวจสอบ
+        </div>
+
+
+        <button
+          class="menu-item"
+          data-page="print-logs"
+          onclick="App.navigate('print-logs')"
+        >
+          <i class="fa-solid fa-print"></i>
+          <span>ประวัติการพิมพ์</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="audit-logs"
+          onclick="App.navigate('audit-logs')"
+        >
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>ประวัติการทำรายการ</span>
+        </button>
+
+
+        <div class="menu-section-title">
+          ระบบ
+        </div>
+
+
+        <button
+          class="menu-item"
+          data-page="settings"
+          onclick="App.navigate('settings')"
+        >
+          <i class="fa-solid fa-gear"></i>
+          <span>ตั้งค่าระบบ</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="users"
+          onclick="App.navigate('users')"
+        >
+          <i class="fa-solid fa-user-shield"></i>
+          <span>ผู้ใช้งาน</span>
+        </button>
+
+
+        <button
+          class="menu-item"
+          data-page="printer"
+          onclick="App.navigate('printer')"
+        >
+          <i class="fa-solid fa-receipt"></i>
+          <span>เครื่องพิมพ์</span>
+        </button>
+
+
+        <div class="sidebar-footer">
+
+          <div class="powered">
+            Powered by
+            <strong>TNBJO</strong>
+          </div>
+
+          <div id="appVersion">
+            Version 1.0.0
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =======================================================
+         MOBILE OVERLAY
+    ======================================================== -->
+
+    <div
+      id="sidebarOverlay"
+      class="sidebar-overlay"
+      onclick="App.toggleSidebar(false)"
+    ></div>
+
+
+    <!-- =======================================================
+         MAIN
+    ======================================================== -->
+
+    <main class="main">
+
+      <!-- =====================================================
+           TOPBAR
+      ====================================================== -->
+
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <button
+            type="button"
+            class="icon-button mobile-menu-button"
+            onclick="App.toggleSidebar(true)"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+
+          <div>
+
+            <div
+              id="pageTitle"
+              class="page-title"
+            >
+              Dashboard
+            </div>
+
+            <div
+              id="pageSubtitle"
+              class="page-subtitle"
+            >
+              ภาพรวมระบบการเงิน
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+          <div
+            id="connectionStatus"
+            class="connection-status checking"
+          >
+            <span class="status-dot"></span>
+            <span>กำลังเชื่อมต่อ</span>
+          </div>
+
+
+          <button
+            type="button"
+            class="icon-button"
+            onclick="App.refreshCurrentPage()"
+            title="รีเฟรช"
+          >
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+
+
+          <div class="user-menu">
+
+            <div class="user-avatar">
+              <i class="fa-solid fa-user"></i>
+            </div>
+
+            <div class="user-info">
+
+              <div
+                id="currentUserName"
+                class="user-name"
+              >
+                ผู้ใช้งาน
+              </div>
+
+              <div
+                id="currentUserRole"
+                class="user-role"
+              >
+                STAFF
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- =====================================================
+           CONTENT
+      ====================================================== -->
+
+      <section
+        id="content"
+        class="content"
+      >
+
+        <!-- ===================================================
+             DASHBOARD
+        ==================================================== -->
+
+        <div
+          id="page-dashboard"
+          class="page active"
+        >
+
+          <div class="page-actions">
+
+            <div>
+              <h1>Dashboard</h1>
+              <p>ภาพรวมการออกใบสั่งจ่ายและเช็ค</p>
+            </div>
+
+            <div class="action-group">
+
+              <button
+                class="btn btn-primary"
+                onclick="PaymentOrders.openCreate()"
+              >
+                <i class="fa-solid fa-plus"></i>
+                ออกใบสั่งจ่าย
+              </button>
+
+              <button
+                class="btn btn-secondary"
+                onclick="Cheques.openCreate()"
+              >
+                <i class="fa-solid fa-money-check-dollar"></i>
+                ออกเช็ค
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-grid">
+
+            <div class="stat-card">
+
+              <div class="stat-icon">
+                <i class="fa-solid fa-file-invoice"></i>
+              </div>
+
+              <div class="stat-content">
+
+                <div class="stat-label">
+                  ใบสั่งจ่ายทั้งหมด
+                </div>
+
+                <div
+                  id="dashboardPaymentTotal"
+                  class="stat-value"
+                >
+                  0
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <div class="stat-icon">
+                <i class="fa-solid fa-calendar-day"></i>
+              </div>
+
+              <div class="stat-content">
+
+                <div class="stat-label">
+                  ใบสั่งจ่ายวันนี้
+                </div>
+
+                <div
+                  id="dashboardPaymentToday"
+                  class="stat-value"
+                >
+                  0
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <div class="stat-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </div>
+
+              <div class="stat-content">
+
+                <div class="stat-label">
+                  ยอดจ่ายวันนี้
+                </div>
+
+                <div
+                  id="dashboardPaymentAmount"
+                  class="stat-value"
+                >
+                  ฿0.00
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+              <div class="stat-icon">
+                <i class="fa-solid fa-money-check-dollar"></i>
+              </div>
+
+              <div class="stat-content">
+
+                <div class="stat-label">
+                  เช็คทั้งหมด
+                </div>
+
+                <div
+                  id="dashboardChequeTotal"
+                  class="stat-value"
+                >
+                  0
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    ใบสั่งจ่ายล่าสุด
+                  </h2>
+
+                  <p>
+                    รายการล่าสุดจากระบบ
+                  </p>
+
+                </div>
+
+                <button
+                  class="btn btn-link"
+                  onclick="App.navigate('payment-orders')"
+                >
+                  ดูทั้งหมด
+                </button>
+
+              </div>
+
+              <div
+                id="dashboardRecentPayments"
+                class="table-wrapper"
+              ></div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    เช็คล่าสุด
+                  </h2>
+
+                  <p>
+                    รายการเช็คล่าสุด
+                  </p>
+
+                </div>
+
+                <button
+                  class="btn btn-link"
+                  onclick="App.navigate('cheques')"
+                >
+                  ดูทั้งหมด
+                </button>
+
+              </div>
+
+              <div
+                id="dashboardRecentCheques"
+                class="table-wrapper"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PAYMENT ORDERS
+        ==================================================== -->
+
+        <div
+          id="page-payment-orders"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ใบสั่งจ่าย
+              </h1>
+
+              <p>
+                จัดการและออกใบสั่งจ่าย
+              </p>
+
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="PaymentOrders.openCreate()"
+            >
+              <i class="fa-solid fa-plus"></i>
+              ออกใบสั่งจ่าย
+            </button>
+
+          </div>
+
+
+          <div class="filter-panel">
+
+            <div class="form-group">
+
+              <label>
+                ค้นหา
+              </label>
+
+              <div class="input-icon">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                  id="paymentSearch"
+                  type="text"
+                  placeholder="เลขที่ / ผู้รับเงิน / รายการ"
+                  onkeydown="if(event.key==='Enter') PaymentOrders.load(1)"
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                สถานะ
+              </label>
+
+              <select
+                id="paymentStatusFilter"
+                onchange="PaymentOrders.load(1)"
+              >
+
+                <option value="">
+                  ทั้งหมด
+                </option>
+
+                <option value="PENDING">
+                  รอตรวจสอบ
+                </option>
+
+                <option value="APPROVED">
+                  อนุมัติแล้ว
+                </option>
+
+                <option value="CANCELLED">
+                  ยกเลิก
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                ตั้งแต่วันที่
+              </label>
+
+              <input
+                id="paymentDateFrom"
+                type="date"
+                onchange="PaymentOrders.load(1)"
+              >
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                ถึงวันที่
+              </label>
+
+              <input
+                id="paymentDateTo"
+                type="date"
+                onchange="PaymentOrders.load(1)"
+              >
+
+            </div>
+
+
+            <button
+              class="btn btn-secondary filter-reset"
+              onclick="PaymentOrders.resetFilter()"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+              ล้าง
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="paymentOrdersTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="paymentOrdersPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             CHEQUES
+        ==================================================== -->
+
+        <div
+          id="page-cheques"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                เช็ค
+              </h1>
+
+              <p>
+                จัดการเช็คและสถานะการพิมพ์
+              </p>
+
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="Cheques.openCreate()"
+            >
+              <i class="fa-solid fa-plus"></i>
+              ออกเช็ค
+            </button>
+
+          </div>
+
+
+          <div class="filter-panel">
+
+            <div class="form-group">
+
+              <label>
+                ค้นหา
+              </label>
+
+              <div class="input-icon">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                  id="chequeSearch"
+                  type="text"
+                  placeholder="เลขที่เช็ค / ผู้รับเงิน / ธนาคาร"
+                  onkeydown="if(event.key==='Enter') Cheques.load(1)"
+                >
+
+              </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                สถานะ
+              </label>
+
+              <select
+                id="chequeStatusFilter"
+                onchange="Cheques.load(1)"
+              >
+
+                <option value="">
+                  ทั้งหมด
+                </option>
+
+                <option value="ISSUED">
+                  ออกเช็คแล้ว
+                </option>
+
+                <option value="PRINTED">
+                  พิมพ์แล้ว
+                </option>
+
+                <option value="CANCELLED">
+                  ยกเลิก
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <button
+              class="btn btn-secondary filter-reset"
+              onclick="Cheques.resetFilter()"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+              ล้าง
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="chequesTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="chequesPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PAYEES
+        ==================================================== -->
+
+        <div
+          id="page-payees"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ผู้รับเงิน
+              </h1>
+
+              <p>
+                จัดการข้อมูลผู้รับเงิน
+              </p>
+
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="Payees.openCreate()"
+            >
+              <i class="fa-solid fa-user-plus"></i>
+              เพิ่มผู้รับเงิน
+            </button>
+
+          </div>
+
+
+          <div class="filter-panel">
+
+            <div class="form-group search-wide">
+
+              <label>
+                ค้นหา
+              </label>
+
+              <div class="input-icon">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                  id="payeeSearch"
+                  type="text"
+                  placeholder="ชื่อ / รหัส / เลขประจำตัว / โทรศัพท์ / บัญชี"
+                  onkeydown="if(event.key==='Enter') Payees.load(1)"
+                >
+
+              </div>
+
+            </div>
+
+
+            <button
+              class="btn btn-secondary filter-reset"
+              onclick="Payees.resetFilter()"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+              ล้าง
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="payeesTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="payeesPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PRINT
+        ==================================================== -->
+
+        <div
+          id="page-print"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                พิมพ์เอกสาร
+              </h1>
+
+              <p>
+                พิมพ์ใบสั่งจ่ายและเช็ค
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="printer-grid">
+
+            <div class="printer-card">
+
+              <div class="printer-card-icon">
+                <i class="fa-solid fa-file-invoice"></i>
+              </div>
+
+              <h2>
+                ใบสั่งจ่าย
+              </h2>
+
+              <p>
+                พิมพ์ใบสั่งจ่ายในรูปแบบเอกสารทางการ
+              </p>
+
+              <button
+                class="btn btn-primary"
+                onclick="Print.openPaymentSearch()"
+              >
+                <i class="fa-solid fa-print"></i>
+                เลือกใบสั่งจ่าย
+              </button>
+
+            </div>
+
+
+            <div class="printer-card">
+
+              <div class="printer-card-icon">
+                <i class="fa-solid fa-money-check-dollar"></i>
+              </div>
+
+              <h2>
+                เช็ค
+              </h2>
+
+              <p>
+                พิมพ์ข้อมูลเช็คสำหรับเครื่องพิมพ์
+              </p>
+
+              <button
+                class="btn btn-primary"
+                onclick="Print.openChequeSearch()"
+              >
+                <i class="fa-solid fa-print"></i>
+                เลือกเช็ค
+              </button>
+
+            </div>
+
+
+            <div class="printer-card">
+
+              <div class="printer-card-icon">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+
+              <h2>
+                ทดสอบเครื่องพิมพ์
+              </h2>
+
+              <p>
+                ตรวจสอบรูปแบบกระดาษและการตัดกระดาษ
+              </p>
+
+              <button
+                class="btn btn-secondary"
+                onclick="Printer.testPrint()"
+              >
+                <i class="fa-solid fa-print"></i>
+                พิมพ์ทดสอบ
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PRINT LOGS
+        ==================================================== -->
+
+        <div
+          id="page-print-logs"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ประวัติการพิมพ์
+              </h1>
+
+              <p>
+                ตรวจสอบรายการพิมพ์เอกสาร
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="printLogsTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="printLogsPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             AUDIT LOGS
+        ==================================================== -->
+
+        <div
+          id="page-audit-logs"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ประวัติการทำรายการ
+              </h1>
+
+              <p>
+                Audit Log ของระบบ
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="auditLogsTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="auditLogsPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             SETTINGS
+        ==================================================== -->
+
+        <div
+          id="page-settings"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ตั้งค่าระบบ
+              </h1>
+
+              <p>
+                ข้อมูลหน่วยงานและการตั้งค่าเอกสาร
+              </p>
+
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="Settings.save()"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              บันทึก
+            </button>
+
+          </div>
+
+
+          <div class="settings-grid">
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    ข้อมูลหน่วยงาน
+                  </h2>
+
+                  <p>
+                    ข้อมูลที่จะแสดงบนเอกสาร
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-grid">
+
+                <div class="form-group form-span-2">
+
+                  <label>
+                    ชื่อหน่วยงาน
+                  </label>
+
+                  <input
+                    id="settingOrganizationName"
+                    type="text"
+                  >
+
+                </div>
+
+
+                <div class="form-group form-span-2">
+
+                  <label>
+                    ที่อยู่
+                  </label>
+
+                  <textarea
+                    id="settingOrganizationAddress"
+                    rows="3"
+                  ></textarea>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    โทรศัพท์
+                  </label>
+
+                  <input
+                    id="settingOrganizationPhone"
+                    type="text"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    อีเมล
+                  </label>
+
+                  <input
+                    id="settingOrganizationEmail"
+                    type="email"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    เลขประจำตัวผู้เสียภาษี
+                  </label>
+
+                  <input
+                    id="settingOrganizationTaxId"
+                    type="text"
+                  >
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    รูปแบบเอกสาร
+                  </h2>
+
+                  <p>
+                    ตั้งค่าเลขที่เอกสาร
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-grid">
+
+                <div class="form-group">
+
+                  <label>
+                    Prefix ใบสั่งจ่าย
+                  </label>
+
+                  <input
+                    id="settingPaymentOrderPrefix"
+                    type="text"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Prefix เช็ค
+                  </label>
+
+                  <input
+                    id="settingChequePrefix"
+                    type="text"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Prefix ผู้รับเงิน
+                  </label>
+
+                  <input
+                    id="settingPayeePrefix"
+                    type="text"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    สกุลเงิน
+                  </label>
+
+                  <input
+                    id="settingDefaultCurrency"
+                    type="text"
+                    value="THB"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    ต้องอนุมัติก่อน
+                  </label>
+
+                  <select
+                    id="settingRequireApproval"
+                  >
+
+                    <option value="true">
+                      ใช่
+                    </option>
+
+                    <option value="false">
+                      ไม่
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    แก้ไขเอกสารที่อนุมัติแล้ว
+                  </label>
+
+                  <select
+                    id="settingAllowEditApproved"
+                  >
+
+                    <option value="false">
+                      ไม่อนุญาต
+                    </option>
+
+                    <option value="true">
+                      อนุญาต
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             USERS
+        ==================================================== -->
+
+        <div
+          id="page-users"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                ผู้ใช้งาน
+              </h1>
+
+              <p>
+                จัดการบัญชีและสิทธิ์การใช้งาน
+              </p>
+
+            </div>
+
+            <button
+              class="btn btn-primary"
+              onclick="Users.openCreate()"
+            >
+              <i class="fa-solid fa-user-plus"></i>
+              เพิ่มผู้ใช้งาน
+            </button>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="usersTable"
+              class="table-wrapper"
+            ></div>
+
+            <div
+              id="usersPagination"
+              class="pagination"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PRINTER
+        ==================================================== -->
+
+        <div
+          id="page-printer"
+          class="page"
+        >
+
+          <div class="page-actions">
+
+            <div>
+
+              <h1>
+                เครื่องพิมพ์
+              </h1>
+
+              <p>
+                ตั้งค่าเครื่องพิมพ์ใบเสร็จ Bluetooth 80mm
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="settings-grid">
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    การตั้งค่าเครื่องพิมพ์
+                  </h2>
+
+                  <p>
+                    เครื่องพิมพ์ ESC/POS ขนาด 80mm
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-grid">
+
+                <div class="form-group">
+
+                  <label>
+                    ชื่อเครื่องพิมพ์
+                  </label>
+
+                  <input
+                    id="printerName"
+                    type="text"
+                    placeholder="เช่น Bluetooth Printer"
+                  >
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    ขนาดกระดาษ
+                  </label>
+
+                  <select
+                    id="printerPaperWidth"
+                  >
+
+                    <option value="80mm">
+                      80mm
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    ระบบพิมพ์
+                  </label>
+
+                  <select
+                    id="printerType"
+                  >
+
+                    <option value="ESC/POS">
+                      ESC/POS
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    ตัดกระดาษอัตโนมัติ
+                  </label>
+
+                  <select
+                    id="printerAutoCut"
+                  >
+
+                    <option value="true">
+                      เปิด
+                    </option>
+
+                    <option value="false">
+                      ปิด
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  class="btn btn-primary"
+                  onclick="Printer.connect()"
+                >
+                  <i class="fa-solid fa-bluetooth"></i>
+                  เชื่อมต่อ Bluetooth
+                </button>
+
+
+                <button
+                  class="btn btn-secondary"
+                  onclick="Printer.testPrint()"
+                >
+                  <i class="fa-solid fa-print"></i>
+                  ทดสอบพิมพ์
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+
+                  <h2>
+                    สถานะ
+                  </h2>
+
+                </div>
+
+              </div>
+
+
+              <div class="printer-status-box">
+
+                <div
+                  id="printerStatusIcon"
+                  class="printer-status-icon"
+                >
+                  <i class="fa-solid fa-print"></i>
+                </div>
+
+                <div>
+
+                  <strong
+                    id="printerStatusText"
+                  >
+                    ยังไม่ได้เชื่อมต่อ
+                  </strong>
+
+                  <p
+                    id="printerStatusDescription"
+                  >
+                    กรุณาเชื่อมต่อเครื่องพิมพ์
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =========================================================
+       MODAL ROOT
+  ========================================================== -->
+
+  <div
+    id="modalRoot"
+    class="modal-root"
+  ></div>
+
+
+  <!-- =========================================================
+       LOADING
+  ========================================================== -->
+
+  <div
+    id="globalLoading"
+    class="global-loading hidden"
+  >
+
+    <div class="loading-box">
+
+      <div class="loading-spinner"></div>
+
+      <div id="loadingText">
+        กำลังดำเนินการ...
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       APPLICATION JAVASCRIPT
+  ========================================================== -->
+
+  <script>
+
+    /* =========================================================
+       CONFIG
+    ========================================================== */
+
+    const APP_CONFIG = {
+
+      API_URL:
+        "https://script.google.com/macros/s/AKfycbxMHl5gxxBUD0vrJ__NiODP_dChkNRJZlqKVK4HyixlPPVGSlAjcI0eh1q-95n6n_ZC/exec",
+
+      PAGE_SIZE:
+        20,
+
+      APP_NAME:
+        "TNBJO Payment Order & Cheque System",
+
+      PAPER_WIDTH:
+        "80mm"
+
+    };
+
+
+    /* =========================================================
+       STATE
+    ========================================================== */
+
+    const STATE = {
+
+      currentPage:
+        "dashboard",
+
+      currentUser:
+        null,
+
+      settings:
+        {},
+
+      paymentOrders:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      cheques:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      payees:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      users:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      printLogs:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      auditLogs:
+        {
+          page: 1,
+          pageSize: APP_CONFIG.PAGE_SIZE,
+          data: [],
+          pagination: {}
+        },
+
+      printer:
+        {
+          connected:
+            false,
+
+          device:
+            null,
+
+          characteristic:
+            null
+        }
+
+    };
+
+
+    /* =========================================================
+       UTILITIES
+    ========================================================== */
+
+    const Utils = {
+
+      escapeHtml:
+        function(value) {
+
+          if (
+            value === null ||
+            value === undefined
+          ) {
+            return "";
+          }
+
+          return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+        },
+
+
+      formatMoney:
+        function(value) {
+
+          const number =
+            Number(value || 0);
+
+          return new Intl.NumberFormat(
+            "th-TH",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }
+          ).format(number);
+
+        },
+
+
+      formatDate:
+        function(value) {
+
+          if (!value) {
+            return "-";
+          }
+
+          const text =
+            String(value);
+
+          if (
+            /^\d{4}-\d{2}-\d{2}$/.test(text)
+          ) {
+
+            const parts =
+              text.split("-");
+
+            return (
+              parts[2] +
+              "/" +
+              parts[1] +
+              "/" +
+              parts[0]
+            );
+
+          }
+
+          return text;
+
+        },
+
+
+      formatDateTime:
+        function(value) {
+
+          if (!value) {
+            return "-";
+          }
+
+          return String(value);
+
+        },
+
+
+      status:
+        function(value) {
+
+          const map = {
+
+            PENDING:
+              {
+                text: "รอตรวจสอบ",
+                class: "warning"
+              },
+
+            APPROVED:
+              {
+                text: "อนุมัติแล้ว",
+                class: "success"
+              },
+
+            CANCELLED:
+              {
+                text: "ยกเลิก",
+                class: "danger"
+              },
+
+            ISSUED:
+              {
+                text: "ออกเช็คแล้ว",
+                class: "info"
+              },
+
+            PRINTED:
+              {
+                text: "พิมพ์แล้ว",
+                class: "success"
+              },
+
+            ACTIVE:
+              {
+                text: "ใช้งาน",
+                class: "success"
+              },
+
+            INACTIVE:
+              {
+                text: "ปิดใช้งาน",
+                class: "danger"
+              }
+
+          };
+
+
+          const item =
+            map[value] || {
+
+              text:
+                value || "-",
+
+              class:
+                "neutral"
+
+            };
+
+
+          return `
+            <span class="status-badge ${item.class}">
+              ${Utils.escapeHtml(item.text)}
+            </span>
+          `;
+
+        },
+
+
+      debounce:
+        function(fn, delay) {
+
+          let timer;
+
+          return function() {
+
+            const context =
+              this;
+
+            const args =
+              arguments;
+
+            clearTimeout(timer);
+
+            timer =
+              setTimeout(
+                function() {
+
+                  fn.apply(
+                    context,
+                    args
+                  );
+
+                },
+                delay
+              );
+
+          };
+
+        },
+
+
+      uuid:
+        function() {
+
+          return (
+            Date.now()
+              .toString(36) +
+            Math.random()
+              .toString(36)
+              .substring(2)
+          );
+
+        },
+
+
+      today:
+        function() {
+
+          const now =
+            new Date();
+
+          const y =
+            now.getFullYear();
+
+          const m =
+            String(
+              now.getMonth() + 1
+            ).padStart(2, "0");
+
+          const d =
+            String(
+              now.getDate()
+            ).padStart(2, "0");
+
+          return (
+            y +
+            "-" +
+            m +
+            "-" +
+            d
+          );
+
+        }
+
+    };
+
+
+    /* =========================================================
+       API CLIENT
+    ========================================================== */
+
+    const API = {
+
+      validate:
+        function() {
+
+          if (
+            !APP_CONFIG.API_URL ||
+            APP_CONFIG.API_URL.indexOf(
+              "PUT_YOUR"
+            ) === 0
+          ) {
+
+            throw new Error(
+              "กรุณากำหนด API_URL ใน index.html"
+            );
+
+          }
+
+        },
+
+
+      get:
+        async function(action, params = {}) {
+
+          API.validate();
+
+          const query =
+            new URLSearchParams();
+
+          query.set(
+            "action",
+            action
+          );
+
+
+          Object.keys(params)
+            .forEach(function(key) {
+
+              if (
+                params[key] !== undefined &&
+                params[key] !== null &&
+                params[key] !== ""
+              ) {
+
+                query.set(
+                  key,
+                  params[key]
+                );
+
+              }
+
+            });
+
+
+          const url =
+            APP_CONFIG.API_URL +
+            "?" +
+            query.toString();
+
+
+          const response =
+            await fetch(
+              url,
+              {
+                method: "GET",
+                cache: "no-store"
+              }
+            );
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              "HTTP " +
+              response.status
+            );
+
+          }
+
+
+          const result =
+            await response.json();
+
+
+          if (!result.success) {
+
+            throw new Error(
+              result.error &&
+              result.error.message
+                ? result.error.message
+                : "API Error"
+            );
+
+          }
+
+
+          return result.data;
+
+        },
+
+
+      post:
+        async function(action, data = {}) {
+
+          API.validate();
+
+
+          const payload =
+            Object.assign(
+              {},
+              data,
+              {
+                action:
+                  action,
+
+                actor:
+                  STATE.currentUser
+                    ? STATE.currentUser.username
+                    : "WEB"
+              }
+            );
+
+
+          const response =
+            await fetch(
+              APP_CONFIG.API_URL,
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "text/plain;charset=utf-8"
+                },
+
+                body:
+                  JSON.stringify(payload)
+              }
+            );
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              "HTTP " +
+              response.status
+            );
+
+          }
+
+
+          const result =
+            await response.json();
+
+
+          if (!result.success) {
+
+            throw new Error(
+              result.error &&
+              result.error.message
+                ? result.error.message
+                : "API Error"
+            );
+
+          }
+
+
+          return result.data;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       UI
+    ========================================================== */
+
+    const UI = {
+
+      loading:
+        function(show, text) {
+
+          const element =
+            document.getElementById(
+              "globalLoading"
+            );
+
+          const textElement =
+            document.getElementById(
+              "loadingText"
+            );
+
+
+          if (text) {
+
+            textElement.textContent =
+              text;
+
+          }
+
+
+          if (show) {
+
+            element.classList.remove(
+              "hidden"
+            );
+
+          } else {
+
+            element.classList.add(
+              "hidden"
+            );
+
+          }
+
+        },
+
+
+      success:
+        function(title, text) {
+
+          return Swal.fire({
+
+            icon:
+              "success",
+
+            title:
+              title,
+
+            text:
+              text || "",
+
+            confirmButtonText:
+              "ตกลง"
+
+          });
+
+        },
+
+
+      error:
+        function(error) {
+
+          const message =
+            error &&
+            error.message
+              ? error.message
+              : String(error);
+
+
+          return Swal.fire({
+
+            icon:
+              "error",
+
+            title:
+              "เกิดข้อผิดพลาด",
+
+            text:
+              message,
+
+            confirmButtonText:
+              "ตกลง"
+
+          });
+
+        },
+
+
+      confirm:
+        async function(
+          title,
+          text
+        ) {
+
+          const result =
+            await Swal.fire({
+
+              icon:
+                "warning",
+
+              title:
+                title,
+
+              text:
+                text,
+
+              showCancelButton:
+                true,
+
+              confirmButtonText:
+                "ยืนยัน",
+
+              cancelButtonText:
+                "ยกเลิก",
+
+              reverseButtons:
+                true
+
+            });
+
+
+          return result.isConfirmed;
+
+        },
+
+
+      empty:
+        function(
+          message
+        ) {
+
+          return `
+            <div class="empty-state">
+
+              <div class="empty-icon">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+
+              <div class="empty-title">
+                ${Utils.escapeHtml(
+                  message || "ไม่พบข้อมูล"
+                )}
+              </div>
+
+            </div>
+          `;
+
+        },
+
+
+      tableLoading:
+        function() {
+
+          return `
+            <div class="table-loading">
+
+              <div class="loading-spinner"></div>
+
+              <span>
+                กำลังโหลดข้อมูล...
+              </span>
+
+            </div>
+          `;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       APP
+    ========================================================== */
+
+    const App = {
+
+      init:
+        async function() {
+
+          App.loadUser();
+
+          App.bindEvents();
+
+          App.updateUserDisplay();
+
+          await App.checkConnection();
+
+          await App.loadSettings();
+
+          App.navigate(
+            "dashboard"
+          );
+
+        },
+
+
+      bindEvents:
+        function() {
+
+          window.addEventListener(
+            "popstate",
+            function() {
+
+              App.navigate(
+                location.hash
+                  ? location.hash.substring(1)
+                  : "dashboard",
+                false
+              );
+
+            }
+          );
+
+
+          document.addEventListener(
+            "keydown",
+            function(event) {
+
+              if (
+                event.key === "Escape"
+              ) {
+
+                App.closeModal();
+
+              }
+
+            }
+          );
+
+        },
+
+
+      navigate:
+        async function(
+          page,
+          updateHash = true
+        ) {
+
+          const allowed = [
+
+            "dashboard",
+
+            "payment-orders",
+
+            "cheques",
+
+            "payees",
+
+            "print",
+
+            "print-logs",
+
+            "audit-logs",
+
+            "settings",
+
+            "users",
+
+            "printer"
+
+          ];
+
+
+          if (
+            allowed.indexOf(page) === -1
+          ) {
+
+            page =
+              "dashboard";
+
+          }
+
+
+          STATE.currentPage =
+            page;
+
+
+          if (updateHash) {
+
+            history.pushState(
+              {},
+              "",
+              "#" + page
+            );
+
+          }
+
+
+          document
+            .querySelectorAll(
+              ".page"
+            )
+            .forEach(function(element) {
+
+              element.classList.remove(
+                "active"
+              );
+
+            });
+
+
+          const pageElement =
+            document.getElementById(
+              "page-" + page
+            );
+
+
+          if (pageElement) {
+
+            pageElement.classList.add(
+              "active"
+            );
+
+          }
+
+
+          document
+            .querySelectorAll(
+              ".menu-item"
+            )
+            .forEach(function(item) {
+
+              item.classList.toggle(
+                "active",
+                item.dataset.page === page
+              );
+
+            });
+
+
+          App.setPageTitle(
+            page
+          );
+
+
+          App.toggleSidebar(
+            false
+          );
+
+
+          await App.loadPage(
+            page
+          );
+
+        },
+
+
+      setPageTitle:
+        function(page) {
+
+          const titles = {
+
+            dashboard:
+              [
+                "Dashboard",
+                "ภาพรวมระบบการเงิน"
+              ],
+
+            "payment-orders":
+              [
+                "ใบสั่งจ่าย",
+                "จัดการใบสั่งจ่าย"
+              ],
+
+            cheques:
+              [
+                "เช็ค",
+                "จัดการเช็ค"
+              ],
+
+            payees:
+              [
+                "ผู้รับเงิน",
+                "ข้อมูลผู้รับเงิน"
+              ],
+
+            print:
+              [
+                "พิมพ์เอกสาร",
+                "พิมพ์ใบสั่งจ่ายและเช็ค"
+              ],
+
+            "print-logs":
+              [
+                "ประวัติการพิมพ์",
+                "ตรวจสอบรายการพิมพ์"
+              ],
+
+            "audit-logs":
+              [
+                "ประวัติการทำรายการ",
+                "Audit Log"
+              ],
+
+            settings:
+              [
+                "ตั้งค่าระบบ",
+                "ตั้งค่าข้อมูลหน่วยงาน"
+              ],
+
+            users:
+              [
+                "ผู้ใช้งาน",
+                "จัดการบัญชีผู้ใช้งาน"
+              ],
+
+            printer:
+              [
+                "เครื่องพิมพ์",
+                "ตั้งค่าเครื่องพิมพ์"
+              ]
+
+          };
+
+
+          const title =
+            titles[page] ||
+            titles.dashboard;
+
+
+          document.getElementById(
+            "pageTitle"
+          ).textContent =
+            title[0];
+
+
+          document.getElementById(
+            "pageSubtitle"
+          ).textContent =
+            title[1];
+
+        },
+
+
+      loadPage:
+        async function(page) {
+
+          try {
+
+            switch(page) {
+
+              case "dashboard":
+                await Dashboard.load();
+                break;
+
+              case "payment-orders":
+                await PaymentOrders.load(1);
+                break;
+
+              case "cheques":
+                await Cheques.load(1);
+                break;
+
+              case "payees":
+                await Payees.load(1);
+                break;
+
+              case "print-logs":
+                await PrintLogs.load(1);
+                break;
+
+              case "audit-logs":
+                await AuditLogs.load(1);
+                break;
+
+              case "settings":
+                await Settings.load();
+                break;
+
+              case "users":
+                await Users.load(1);
+                break;
+
+              case "printer":
+                Printer.loadSettings();
+                break;
+
+            }
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      refreshCurrentPage:
+        async function() {
+
+          await App.loadPage(
+            STATE.currentPage
+          );
+
+        },
+
+
+      checkConnection:
+        async function() {
+
+          const status =
+            document.getElementById(
+              "connectionStatus"
+            );
+
+
+          try {
+
+            await API.get(
+              "health"
+            );
+
+
+            status.className =
+              "connection-status online";
+
+
+            status.innerHTML = `
+              <span class="status-dot"></span>
+              <span>เชื่อมต่อแล้ว</span>
+            `;
+
+
+          } catch(error) {
+
+            status.className =
+              "connection-status offline";
+
+
+            status.innerHTML = `
+              <span class="status-dot"></span>
+              <span>เชื่อมต่อไม่ได้</span>
+            `;
+
+          }
+
+        },
+
+
+      loadSettings:
+        async function() {
+
+          try {
+
+            STATE.settings =
+              await API.get(
+                "settings"
+              );
+
+            App.applySettings();
+
+          } catch(error) {
+
+            console.error(
+              error
+            );
+
+          }
+
+        },
+
+
+      applySettings:
+        function() {
+
+          const settings =
+            STATE.settings;
+
+
+          if (
+            settings.organizationName
+          ) {
+
+            document.title =
+              settings.organizationName +
+              " - TNBJO";
+
+          }
+
+        },
+
+
+      loadUser:
+        function() {
+
+          try {
+
+            const saved =
+              localStorage.getItem(
+                "tnbjo_current_user"
+              );
+
+
+            if (saved) {
+
+              STATE.currentUser =
+                JSON.parse(saved);
+
+            }
+
+          } catch(error) {
+
+            console.error(error);
+
+          }
+
+        },
+
+
+      saveUser:
+        function(user) {
+
+          STATE.currentUser =
+            user;
+
+
+          localStorage.setItem(
+            "tnbjo_current_user",
+            JSON.stringify(user)
+          );
+
+
+          App.updateUserDisplay();
+
+        },
+
+
+      logout:
+        async function() {
+
+          const confirmed =
+            await UI.confirm(
+              "ออกจากระบบ",
+              "ต้องการออกจากระบบหรือไม่?"
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          localStorage.removeItem(
+            "tnbjo_current_user"
+          );
+
+
+          STATE.currentUser =
+            null;
+
+
+          App.updateUserDisplay();
+
+        },
+
+
+      updateUserDisplay:
+        function() {
+
+          const user =
+            STATE.currentUser;
+
+
+          document.getElementById(
+            "currentUserName"
+          ).textContent =
+            user
+              ? (
+                  user.displayName ||
+                  user.username
+                )
+              : "ผู้ใช้งาน";
+
+
+          document.getElementById(
+            "currentUserRole"
+          ).textContent =
+            user
+              ? (
+                  user.role ||
+                  "STAFF"
+                )
+              : "STAFF";
+
+        },
+
+
+      toggleSidebar:
+        function(show) {
+
+          const sidebar =
+            document.getElementById(
+              "sidebar"
+            );
+
+          const overlay =
+            document.getElementById(
+              "sidebarOverlay"
+            );
+
+
+          if (show) {
+
+            sidebar.classList.add(
+              "open"
+            );
+
+            overlay.classList.add(
+              "show"
+            );
+
+          } else {
+
+            sidebar.classList.remove(
+              "open"
+            );
+
+            overlay.classList.remove(
+              "show"
+            );
+
+          }
+
+        },
+
+
+      openModal:
+        function(html) {
+
+          document.getElementById(
+            "modalRoot"
+          ).innerHTML =
+            html;
+
+
+          document.body.classList.add(
+            "modal-open"
+          );
+
+        },
+
+
+      closeModal:
+        function() {
+
+          document.getElementById(
+            "modalRoot"
+          ).innerHTML =
+            "";
+
+
+          document.body.classList.remove(
+            "modal-open"
+          );
+
+        }
+
+    };
+
+
+    /* =========================================================
+       DASHBOARD
+    ========================================================== */
+
+    const Dashboard = {
+
+      load:
+        async function() {
+
+          const data =
+            await API.get(
+              "dashboard"
+            );
+
+
+          document.getElementById(
+            "dashboardPaymentTotal"
+          ).textContent =
+            data.paymentOrders.total;
+
+
+          document.getElementById(
+            "dashboardPaymentToday"
+          ).textContent =
+            data.paymentOrders.today;
+
+
+          document.getElementById(
+            "dashboardPaymentAmount"
+          ).textContent =
+            "฿" +
+            Utils.formatMoney(
+              data.paymentOrders.todayAmount
+            );
+
+
+          document.getElementById(
+            "dashboardChequeTotal"
+          ).textContent =
+            data.cheques.total;
+
+
+          await Dashboard.loadRecent();
+
+        },
+
+
+      loadRecent:
+        async function() {
+
+          const payments =
+            await API.get(
+              "paymentOrders",
+              {
+                page: 1,
+                pageSize: 5
+              }
+            );
+
+
+          const paymentContainer =
+            document.getElementById(
+              "dashboardRecentPayments"
+            );
+
+
+          if (
+            !payments.data ||
+            payments.data.length === 0
+          ) {
+
+            paymentContainer.innerHTML =
+              UI.empty(
+                "ยังไม่มีใบสั่งจ่าย"
+              );
+
+          } else {
+
+            paymentContainer.innerHTML =
+              Tables.paymentOrders(
+                payments.data,
+                true
+              );
+
+          }
+
+
+          const cheques =
+            await API.get(
+              "cheques",
+              {
+                page: 1,
+                pageSize: 5
+              }
+            );
+
+
+          const chequeContainer =
+            document.getElementById(
+              "dashboardRecentCheques"
+            );
+
+
+          if (
+            !cheques.data ||
+            cheques.data.length === 0
+          ) {
+
+            chequeContainer.innerHTML =
+              UI.empty(
+                "ยังไม่มีเช็ค"
+              );
+
+          } else {
+
+            chequeContainer.innerHTML =
+              Tables.cheques(
+                cheques.data,
+                true
+              );
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PAYMENT ORDERS
+    ========================================================== */
+
+    const PaymentOrders = {
+
+      load:
+        async function(page) {
+
+          STATE.paymentOrders.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "paymentOrdersTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "paymentOrders",
+              {
+
+                page:
+                  STATE.paymentOrders.page,
+
+                pageSize:
+                  STATE.paymentOrders.pageSize,
+
+                search:
+                  document.getElementById(
+                    "paymentSearch"
+                  ).value,
+
+                status:
+                  document.getElementById(
+                    "paymentStatusFilter"
+                  ).value,
+
+                dateFrom:
+                  document.getElementById(
+                    "paymentDateFrom"
+                  ).value,
+
+                dateTo:
+                  document.getElementById(
+                    "paymentDateTo"
+                  ).value
+
+              }
+            );
+
+
+          STATE.paymentOrders =
+            data;
+
+
+          container.innerHTML =
+            Tables.paymentOrders(
+              data.data
+            );
+
+
+          document.getElementById(
+            "paymentOrdersPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "PaymentOrders.load"
+            );
+
+        },
+
+
+      resetFilter:
+        function() {
+
+          document.getElementById(
+            "paymentSearch"
+          ).value = "";
+
+
+          document.getElementById(
+            "paymentStatusFilter"
+          ).value = "";
+
+
+          document.getElementById(
+            "paymentDateFrom"
+          ).value = "";
+
+
+          document.getElementById(
+            "paymentDateTo"
+          ).value = "";
+
+
+          PaymentOrders.load(
+            1
+          );
+
+        },
+
+
+      openCreate:
+        function() {
+
+          PaymentOrders.openForm(
+            null
+          );
+
+        },
+
+
+      openEdit:
+        async function(id) {
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังโหลดใบสั่งจ่าย..."
+            );
+
+
+            const row =
+              await API.get(
+                "paymentOrder",
+                {
+                  id: id
+                }
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            PaymentOrders.openForm(
+              row
+            );
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      openForm:
+        function(row) {
+
+          const edit =
+            !!row;
+
+
+          const html = `
+
+            <div class="modal-backdrop">
+
+              <div class="modal modal-xl">
+
+                <div class="modal-header">
+
+                  <div>
+
+                    <h2>
+                      ${
+                        edit
+                          ? "แก้ไขใบสั่งจ่าย"
+                          : "ออกใบสั่งจ่าย"
+                      }
+                    </h2>
+
+                    <p>
+                      กรอกข้อมูลตามเอกสารทางการ
+                    </p>
+
+                  </div>
+
+                  <button
+                    class="modal-close"
+                    onclick="App.closeModal()"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                  <form
+                    id="paymentOrderForm"
+                    onsubmit="PaymentOrders.submit(event)"
+                  >
+
+                    <input
+                      type="hidden"
+                      id="poId"
+                      value="${edit ? Utils.escapeHtml(row.id) : ""}"
+                    >
+
+
+                    <div class="form-section">
+
+                      <div class="form-section-title">
+                        ข้อมูลเอกสาร
+                      </div>
+
+
+                      <div class="form-grid">
+
+                        <div class="form-group">
+
+                          <label>
+                            วันที่
+                            <span class="required">*</span>
+                          </label>
+
+                          <input
+                            id="poDocumentDate"
+                            type="date"
+                            required
+                            value="${
+                              edit
+                                ? String(row.documentDate).substring(0,10)
+                                : Utils.today()
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            เลขที่เอกสาร
+                          </label>
+
+                          <input
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.documentNo)
+                                : "ระบบจะสร้างอัตโนมัติ"
+                            }"
+                            disabled
+                          >
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="form-section">
+
+                      <div class="form-section-title">
+                        ผู้รับเงิน
+                      </div>
+
+
+                      <div class="form-grid">
+
+                        <div class="form-group form-span-2">
+
+                          <label>
+                            ชื่อผู้รับเงิน
+                            <span class="required">*</span>
+                          </label>
+
+                          <input
+                            id="poPayeeName"
+                            type="text"
+                            required
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.payeeName)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            เลขประจำตัวผู้เสียภาษี
+                          </label>
+
+                          <input
+                            id="poPayeeTaxId"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.payeeTaxId)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group form-span-2">
+
+                          <label>
+                            ที่อยู่
+                          </label>
+
+                          <textarea
+                            id="poPayeeAddress"
+                            rows="2"
+                          >${
+                            edit
+                              ? Utils.escapeHtml(row.payeeAddress)
+                              : ""
+                          }</textarea>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="form-section">
+
+                      <div class="form-section-title">
+                        รายการจ่าย
+                      </div>
+
+
+                      <div class="form-grid">
+
+                        <div class="form-group form-span-2">
+
+                          <label>
+                            รายการ
+                            <span class="required">*</span>
+                          </label>
+
+                          <textarea
+                            id="poDescription"
+                            rows="4"
+                            required
+                            placeholder="ระบุรายละเอียดค่าใช้จ่าย"
+                          >${
+                            edit
+                              ? Utils.escapeHtml(row.description)
+                              : ""
+                          }</textarea>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            จำนวนเงิน
+                            <span class="required">*</span>
+                          </label>
+
+                          <input
+                            id="poAmount"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            required
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.amount)
+                                : ""
+                            }"
+                            oninput="PaymentOrders.updateAmountText()"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            จำนวนเงินตัวอักษร
+                          </label>
+
+                          <input
+                            id="poAmountText"
+                            type="text"
+                            readonly
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.amountText)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            วิธีการจ่าย
+                          </label>
+
+                          <select id="poPaymentMethod">
+
+                            <option value="">
+                              เลือก
+                            </option>
+
+                            <option value="CASH">
+                              เงินสด
+                            </option>
+
+                            <option value="TRANSFER">
+                              โอนเงิน
+                            </option>
+
+                            <option value="CHEQUE">
+                              เช็ค
+                            </option>
+
+                            <option value="OTHER">
+                              อื่น ๆ
+                            </option>
+
+                          </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            เลขที่อ้างอิง
+                          </label>
+
+                          <input
+                            id="poReferenceNo"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.referenceNo)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="form-section">
+
+                      <div class="form-section-title">
+                        ข้อมูลธนาคาร
+                      </div>
+
+
+                      <div class="form-grid">
+
+                        <div class="form-group">
+
+                          <label>
+                            ธนาคาร
+                          </label>
+
+                          <input
+                            id="poBankName"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.bankName)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            สาขา
+                          </label>
+
+                          <input
+                            id="poBankBranch"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.bankBranch)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            ชื่อบัญชี
+                          </label>
+
+                          <input
+                            id="poAccountName"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.accountName)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                          <label>
+                            เลขที่บัญชี
+                          </label>
+
+                          <input
+                            id="poAccountNumber"
+                            type="text"
+                            value="${
+                              edit
+                                ? Utils.escapeHtml(row.accountNumber)
+                                : ""
+                            }"
+                          >
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="form-section">
+
+                      <div class="form-section-title">
+                        หมายเหตุ
+                      </div>
+
+                      <textarea
+                        id="poNote"
+                        rows="3"
+                        placeholder="หมายเหตุเพิ่มเติม"
+                      >${
+                        edit
+                          ? Utils.escapeHtml(row.note)
+                          : ""
+                      }</textarea>
+
+                    </div>
+
+
+                    <div class="modal-actions">
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="App.closeModal()"
+                      >
+                        ยกเลิก
+                      </button>
+
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                      >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        บันทึก
+                      </button>
+
+                    </div>
+
+                  </form>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+
+          App.openModal(
+            html
+          );
+
+
+          if (edit) {
+
+            document.getElementById(
+              "poPaymentMethod"
+            ).value =
+              row.paymentMethod || "";
+
+          }
+
+        },
+
+
+      updateAmountText:
+        function() {
+
+          const amount =
+            document.getElementById(
+              "poAmount"
+            ).value;
+
+
+          const field =
+            document.getElementById(
+              "poAmountText"
+            );
+
+
+          if (!amount) {
+
+            field.value =
+              "";
+
+            return;
+
+          }
+
+
+          field.value =
+            ThaiBaht.numberToText(
+              Number(amount)
+            );
+
+        },
+
+
+      submit:
+        async function(event) {
+
+          event.preventDefault();
+
+
+          const amount =
+            Number(
+              document.getElementById(
+                "poAmount"
+              ).value
+            );
+
+
+          if (
+            !amount ||
+            amount <= 0
+          ) {
+
+            UI.error(
+              new Error(
+                "จำนวนเงินต้องมากกว่า 0"
+              )
+            );
+
+            return;
+
+          }
+
+
+          const data = {
+
+            id:
+              document.getElementById(
+                "poId"
+              ).value,
+
+            documentDate:
+              document.getElementById(
+                "poDocumentDate"
+              ).value,
+
+            payeeName:
+              document.getElementById(
+                "poPayeeName"
+              ).value.trim(),
+
+            payeeTaxId:
+              document.getElementById(
+                "poPayeeTaxId"
+              ).value.trim(),
+
+            payeeAddress:
+              document.getElementById(
+                "poPayeeAddress"
+              ).value.trim(),
+
+            description:
+              document.getElementById(
+                "poDescription"
+              ).value.trim(),
+
+            amount:
+              amount,
+
+            amountText:
+              document.getElementById(
+                "poAmountText"
+              ).value,
+
+            paymentMethod:
+              document.getElementById(
+                "poPaymentMethod"
+              ).value,
+
+            referenceNo:
+              document.getElementById(
+                "poReferenceNo"
+              ).value.trim(),
+
+            bankName:
+              document.getElementById(
+                "poBankName"
+              ).value.trim(),
+
+            bankBranch:
+              document.getElementById(
+                "poBankBranch"
+              ).value.trim(),
+
+            accountName:
+              document.getElementById(
+                "poAccountName"
+              ).value.trim(),
+
+            accountNumber:
+              document.getElementById(
+                "poAccountNumber"
+              ).value.trim(),
+
+            note:
+              document.getElementById(
+                "poNote"
+              ).value.trim()
+
+          };
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังบันทึกใบสั่งจ่าย..."
+            );
+
+
+            const result =
+              await API.post(
+                "savePaymentOrder",
+                data
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            App.closeModal();
+
+
+            await UI.success(
+              "บันทึกสำเร็จ",
+              "เลขที่ " +
+              result.documentNo
+            );
+
+
+            await PaymentOrders.load(
+              STATE.paymentOrders.page || 1
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      approve:
+        async function(id) {
+
+          const confirmed =
+            await UI.confirm(
+              "อนุมัติใบสั่งจ่าย",
+              "ยืนยันการอนุมัติใบสั่งจ่ายรายการนี้?"
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังอนุมัติ..."
+            );
+
+
+            await API.post(
+              "approvePaymentOrder",
+              {
+                id: id
+              }
+            );
+
+
+            UI.loading(
+              false
+            );
+
+
+            await UI.success(
+              "อนุมัติสำเร็จ"
+            );
+
+
+            await PaymentOrders.load(
+              STATE.paymentOrders.page
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      cancel:
+        async function(id) {
+
+          const result =
+            await Swal.fire({
+
+              icon:
+                "warning",
+
+              title:
+                "ยกเลิกใบสั่งจ่าย",
+
+              input:
+                "textarea",
+
+              inputLabel:
+                "เหตุผลการยกเลิก",
+
+              inputPlaceholder:
+                "กรุณาระบุเหตุผล",
+
+              showCancelButton:
+                true,
+
+              confirmButtonText:
+                "ยืนยันการยกเลิก",
+
+              cancelButtonText:
+                "ไม่ยกเลิก",
+
+              inputValidator:
+                function(value) {
+
+                  if (
+                    !value ||
+                    !value.trim()
+                  ) {
+
+                    return "กรุณาระบุเหตุผล";
+
+                  }
+
+                }
+
+            });
+
+
+          if (
+            !result.isConfirmed
+          ) {
+
+            return;
+
+          }
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังยกเลิก..."
+            );
+
+
+            await API.post(
+              "cancelPaymentOrder",
+              {
+                id: id,
+                reason:
+                  result.value.trim()
+              }
+            );
+
+
+            UI.loading(
+              false
+            );
+
+
+            await UI.success(
+              "ยกเลิกสำเร็จ"
+            );
+
+
+            await PaymentOrders.load(
+              STATE.paymentOrders.page
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      print:
+        async function(id) {
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังโหลดเอกสาร..."
+            );
+
+
+            const row =
+              await API.get(
+                "paymentOrder",
+                {
+                  id: id
+                }
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            Print.printPaymentOrder(
+              row
+            );
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       CHEQUES
+    ========================================================== */
+
+    const Cheques = {
+
+      load:
+        async function(page) {
+
+          STATE.cheques.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "chequesTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "cheques",
+              {
+
+                page:
+                  STATE.cheques.page,
+
+                pageSize:
+                  STATE.cheques.pageSize,
+
+                search:
+                  document.getElementById(
+                    "chequeSearch"
+                  ).value,
+
+                status:
+                  document.getElementById(
+                    "chequeStatusFilter"
+                  ).value
+
+              }
+            );
+
+
+          STATE.cheques =
+            data;
+
+
+          container.innerHTML =
+            Tables.cheques(
+              data.data
+            );
+
+
+          document.getElementById(
+            "chequesPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "Cheques.load"
+            );
+
+        },
+
+
+      resetFilter:
+        function() {
+
+          document.getElementById(
+            "chequeSearch"
+          ).value = "";
+
+
+          document.getElementById(
+            "chequeStatusFilter"
+          ).value = "";
+
+
+          Cheques.load(
+            1
+          );
+
+        },
+
+
+      openCreate:
+        function() {
+
+          Cheques.openForm(
+            null
+          );
+
+        },
+
+
+      openEdit:
+        async function(id) {
+
+          try {
+
+            const row =
+              await API.get(
+                "cheque",
+                {
+                  id: id
+                }
+              );
+
+
+            Cheques.openForm(
+              row
+            );
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      openForm:
+        function(row) {
+
+          const edit =
+            !!row;
+
+
+          const html = `
+
+            <div class="modal-backdrop">
+
+              <div class="modal modal-xl">
+
+                <div class="modal-header">
+
+                  <div>
+
+                    <h2>
+                      ${
+                        edit
+                          ? "แก้ไขเช็ค"
+                          : "ออกเช็ค"
+                      }
+                    </h2>
+
+                    <p>
+                      กรอกข้อมูลเช็ค
+                    </p>
+
+                  </div>
+
+                  <button
+                    class="modal-close"
+                    onclick="App.closeModal()"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                  <form
+                    onsubmit="Cheques.submit(event)"
+                  >
+
+                    <input
+                      type="hidden"
+                      id="chequeId"
+                      value="${
+                        edit
+                          ? Utils.escapeHtml(row.id)
+                          : ""
+                      }"
+                    >
+
+
+                    <div class="form-grid">
+
+                      <div class="form-group">
+
+                        <label>
+                          วันที่เช็ค
+                          <span class="required">*</span>
+                        </label>
+
+                        <input
+                          id="chequeDate"
+                          type="date"
+                          required
+                          value="${
+                            edit
+                              ? String(row.chequeDate).substring(0,10)
+                              : Utils.today()
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          เลขที่เช็ค
+                        </label>
+
+                        <input
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.chequeNo)
+                              : "ระบบจะสร้างอัตโนมัติ"
+                          }"
+                          disabled
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          ธนาคาร
+                        </label>
+
+                        <input
+                          id="chequeBankName"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.bankName)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          สาขา
+                        </label>
+
+                        <input
+                          id="chequeBankBranch"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.bankBranch)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          จ่ายให้
+                          <span class="required">*</span>
+                        </label>
+
+                        <input
+                          id="chequePayeeName"
+                          type="text"
+                          required
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.payeeName)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          จำนวนเงิน
+                          <span class="required">*</span>
+                        </label>
+
+                        <input
+                          id="chequeAmount"
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          required
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.amount)
+                              : ""
+                          }"
+                          oninput="Cheques.updateAmountText()"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          จำนวนเงินตัวอักษร
+                        </label>
+
+                        <input
+                          id="chequeAmountText"
+                          type="text"
+                          readonly
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.amountText)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          เลขที่ใบสั่งจ่ายอ้างอิง
+                        </label>
+
+                        <input
+                          id="chequePaymentOrderNo"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.paymentOrderNo)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          หมายเหตุ
+                        </label>
+
+                        <textarea
+                          id="chequeNote"
+                          rows="3"
+                        >${
+                          edit
+                            ? Utils.escapeHtml(row.note)
+                            : ""
+                        }</textarea>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="modal-actions">
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="App.closeModal()"
+                      >
+                        ยกเลิก
+                      </button>
+
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                      >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        บันทึก
+                      </button>
+
+                    </div>
+
+                  </form>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+
+          App.openModal(
+            html
+          );
+
+        },
+
+
+      updateAmountText:
+        function() {
+
+          const amount =
+            document.getElementById(
+              "chequeAmount"
+            ).value;
+
+
+          document.getElementById(
+            "chequeAmountText"
+          ).value =
+            amount
+              ? ThaiBaht.numberToText(
+                  Number(amount)
+                )
+              : "";
+
+        },
+
+
+      submit:
+        async function(event) {
+
+          event.preventDefault();
+
+
+          const data = {
+
+            id:
+              document.getElementById(
+                "chequeId"
+              ).value,
+
+            chequeDate:
+              document.getElementById(
+                "chequeDate"
+              ).value,
+
+            bankName:
+              document.getElementById(
+                "chequeBankName"
+              ).value.trim(),
+
+            bankBranch:
+              document.getElementById(
+                "chequeBankBranch"
+              ).value.trim(),
+
+            payeeName:
+              document.getElementById(
+                "chequePayeeName"
+              ).value.trim(),
+
+            amount:
+              Number(
+                document.getElementById(
+                  "chequeAmount"
+                ).value
+              ),
+
+            amountText:
+              document.getElementById(
+                "chequeAmountText"
+              ).value,
+
+            paymentOrderNo:
+              document.getElementById(
+                "chequePaymentOrderNo"
+              ).value.trim(),
+
+            note:
+              document.getElementById(
+                "chequeNote"
+              ).value.trim()
+
+          };
+
+
+          if (
+            !data.amount ||
+            data.amount <= 0
+          ) {
+
+            UI.error(
+              new Error(
+                "จำนวนเงินต้องมากกว่า 0"
+              )
+            );
+
+            return;
+
+          }
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังบันทึกเช็ค..."
+            );
+
+
+            const result =
+              await API.post(
+                "saveCheque",
+                data
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            App.closeModal();
+
+
+            await UI.success(
+              "บันทึกสำเร็จ",
+              "เลขที่เช็ค " +
+              result.chequeNo
+            );
+
+
+            await Cheques.load(
+              STATE.cheques.page || 1
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      cancel:
+        async function(id) {
+
+          const result =
+            await Swal.fire({
+
+              icon:
+                "warning",
+
+              title:
+                "ยกเลิกเช็ค",
+
+              input:
+                "textarea",
+
+              inputLabel:
+                "เหตุผลการยกเลิก",
+
+              showCancelButton:
+                true,
+
+              confirmButtonText:
+                "ยืนยัน",
+
+              cancelButtonText:
+                "ยกเลิก",
+
+              inputValidator:
+                function(value) {
+
+                  if (
+                    !value ||
+                    !value.trim()
+                  ) {
+
+                    return "กรุณาระบุเหตุผล";
+
+                  }
+
+                }
+
+            });
+
+
+          if (
+            !result.isConfirmed
+          ) {
+
+            return;
+
+          }
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังยกเลิกเช็ค..."
+            );
+
+
+            await API.post(
+              "cancelCheque",
+              {
+                id: id,
+                reason:
+                  result.value.trim()
+              }
+            );
+
+
+            UI.loading(
+              false
+            );
+
+
+            await UI.success(
+              "ยกเลิกเช็คสำเร็จ"
+            );
+
+
+            await Cheques.load(
+              STATE.cheques.page
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      print:
+        async function(id) {
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังโหลดเช็ค..."
+            );
+
+
+            const row =
+              await API.get(
+                "cheque",
+                {
+                  id: id
+                }
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            Print.printCheque(
+              row
+            );
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PAYEES
+    ========================================================== */
+
+    const Payees = {
+
+      load:
+        async function(page) {
+
+          STATE.payees.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "payeesTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "payees",
+              {
+
+                page:
+                  STATE.payees.page,
+
+                pageSize:
+                  STATE.payees.pageSize,
+
+                search:
+                  document.getElementById(
+                    "payeeSearch"
+                  ).value
+
+              }
+            );
+
+
+          STATE.payees =
+            data;
+
+
+          container.innerHTML =
+            Tables.payees(
+              data.data
+            );
+
+
+          document.getElementById(
+            "payeesPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "Payees.load"
+            );
+
+        },
+
+
+      resetFilter:
+        function() {
+
+          document.getElementById(
+            "payeeSearch"
+          ).value = "";
+
+
+          Payees.load(
+            1
+          );
+
+        },
+
+
+      openCreate:
+        function() {
+
+          Payees.openForm(
+            null
+          );
+
+        },
+
+
+      openEdit:
+        async function(id) {
+
+          try {
+
+            const rows =
+              await API.get(
+                "payees",
+                {
+                  page: 1,
+                  pageSize: 100
+                }
+              );
+
+
+            const row =
+              rows.data.find(
+                function(item) {
+
+                  return (
+                    item.id === id
+                  );
+
+                }
+              );
+
+
+            if (!row) {
+
+              throw new Error(
+                "ไม่พบผู้รับเงิน"
+              );
+
+            }
+
+
+            Payees.openForm(
+              row
+            );
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      openForm:
+        function(row) {
+
+          const edit =
+            !!row;
+
+
+          const html = `
+
+            <div class="modal-backdrop">
+
+              <div class="modal modal-xl">
+
+                <div class="modal-header">
+
+                  <div>
+
+                    <h2>
+                      ${
+                        edit
+                          ? "แก้ไขผู้รับเงิน"
+                          : "เพิ่มผู้รับเงิน"
+                      }
+                    </h2>
+
+                    <p>
+                      ข้อมูลผู้รับเงิน
+                    </p>
+
+                  </div>
+
+                  <button
+                    class="modal-close"
+                    onclick="App.closeModal()"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                  <form
+                    onsubmit="Payees.submit(event)"
+                  >
+
+                    <input
+                      type="hidden"
+                      id="payeeId"
+                      value="${
+                        edit
+                          ? Utils.escapeHtml(row.id)
+                          : ""
+                      }"
+                    >
+
+
+                    <div class="form-grid">
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          ชื่อผู้รับเงิน
+                          <span class="required">*</span>
+                        </label>
+
+                        <input
+                          id="payeeName"
+                          type="text"
+                          required
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.name)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          ประเภท
+                        </label>
+
+                        <select id="payeeType">
+
+                          <option value="">
+                            เลือก
+                          </option>
+
+                          <option value="PERSON">
+                            บุคคลธรรมดา
+                          </option>
+
+                          <option value="COMPANY">
+                            นิติบุคคล
+                          </option>
+
+                          <option value="GOVERNMENT">
+                            หน่วยงานราชการ
+                          </option>
+
+                          <option value="OTHER">
+                            อื่น ๆ
+                          </option>
+
+                        </select>
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          เลขประจำตัวผู้เสียภาษี
+                        </label>
+
+                        <input
+                          id="payeeTaxId"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.taxId)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          เลขบัตรประชาชน
+                        </label>
+
+                        <input
+                          id="payeeNationalId"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.nationalId)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          โทรศัพท์
+                        </label>
+
+                        <input
+                          id="payeePhone"
+                          type="tel"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.phone)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          ที่อยู่
+                        </label>
+
+                        <textarea
+                          id="payeeAddress"
+                          rows="3"
+                        >${
+                          edit
+                            ? Utils.escapeHtml(row.address)
+                            : ""
+                        }</textarea>
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          อีเมล
+                        </label>
+
+                        <input
+                          id="payeeEmail"
+                          type="email"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.email)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          ธนาคาร
+                        </label>
+
+                        <input
+                          id="payeeBankName"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.bankName)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          สาขา
+                        </label>
+
+                        <input
+                          id="payeeBankBranch"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.bankBranch)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          ชื่อบัญชี
+                        </label>
+
+                        <input
+                          id="payeeAccountName"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.accountName)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          เลขที่บัญชี
+                        </label>
+
+                        <input
+                          id="payeeAccountNumber"
+                          type="text"
+                          value="${
+                            edit
+                              ? Utils.escapeHtml(row.accountNumber)
+                              : ""
+                          }"
+                        >
+
+                      </div>
+
+
+                      <div class="form-group">
+
+                        <label>
+                          สถานะ
+                        </label>
+
+                        <select id="payeeStatus">
+
+                          <option value="ACTIVE">
+                            ใช้งาน
+                          </option>
+
+                          <option value="INACTIVE">
+                            ปิดใช้งาน
+                          </option>
+
+                        </select>
+
+                      </div>
+
+
+                      <div class="form-group form-span-2">
+
+                        <label>
+                          หมายเหตุ
+                        </label>
+
+                        <textarea
+                          id="payeeNote"
+                          rows="3"
+                        >${
+                          edit
+                            ? Utils.escapeHtml(row.note)
+                            : ""
+                        }</textarea>
+
+                      </div>
+
+                    </div>
+
+
+                    <div class="modal-actions">
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="App.closeModal()"
+                      >
+                        ยกเลิก
+                      </button>
+
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                      >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        บันทึก
+                      </button>
+
+                    </div>
+
+                  </form>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+
+          App.openModal(
+            html
+          );
+
+
+          if (edit) {
+
+            document.getElementById(
+              "payeeType"
+            ).value =
+              row.type || "";
+
+
+            document.getElementById(
+              "payeeStatus"
+            ).value =
+              row.status || "ACTIVE";
+
+          }
+
+        },
+
+
+      submit:
+        async function(event) {
+
+          event.preventDefault();
+
+
+          const data = {
+
+            id:
+              document.getElementById(
+                "payeeId"
+              ).value,
+
+            name:
+              document.getElementById(
+                "payeeName"
+              ).value.trim(),
+
+            type:
+              document.getElementById(
+                "payeeType"
+              ).value,
+
+            taxId:
+              document.getElementById(
+                "payeeTaxId"
+              ).value.trim(),
+
+            nationalId:
+              document.getElementById(
+                "payeeNationalId"
+              ).value.trim(),
+
+            phone:
+              document.getElementById(
+                "payeePhone"
+              ).value.trim(),
+
+            address:
+              document.getElementById(
+                "payeeAddress"
+              ).value.trim(),
+
+            email:
+              document.getElementById(
+                "payeeEmail"
+              ).value.trim(),
+
+            bankName:
+              document.getElementById(
+                "payeeBankName"
+              ).value.trim(),
+
+            bankBranch:
+              document.getElementById(
+                "payeeBankBranch"
+              ).value.trim(),
+
+            accountName:
+              document.getElementById(
+                "payeeAccountName"
+              ).value.trim(),
+
+            accountNumber:
+              document.getElementById(
+                "payeeAccountNumber"
+              ).value.trim(),
+
+            status:
+              document.getElementById(
+                "payeeStatus"
+              ).value,
+
+            note:
+              document.getElementById(
+                "payeeNote"
+              ).value.trim()
+
+          };
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังบันทึก..."
+            );
+
+
+            const result =
+              await API.post(
+                "savePayee",
+                data
+              );
+
+
+            UI.loading(
+              false
+            );
+
+
+            App.closeModal();
+
+
+            await UI.success(
+              "บันทึกสำเร็จ",
+              result.code
+                ? "รหัสผู้รับเงิน " +
+                  result.code
+                : ""
+            );
+
+
+            await Payees.load(
+              STATE.payees.page || 1
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       USERS
+    ========================================================== */
+
+    const Users = {
+
+      load:
+        async function(page) {
+
+          STATE.users.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "usersTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "users",
+              {
+
+                page:
+                  STATE.users.page,
+
+                pageSize:
+                  STATE.users.pageSize
+
+              }
+            );
+
+
+          STATE.users =
+            data;
+
+
+          container.innerHTML =
+            Tables.users(
+              data.data
+            );
+
+
+          document.getElementById(
+            "usersPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "Users.load"
+            );
+
+        },
+
+
+      openCreate:
+        function() {
+
+          Users.openForm(
+            null
+          );
+
+        },
+
+
+      openForm:
+        function(row) {
+
+          const edit =
+            !!row;
+
+
+          const html = `
+
+            <div class="modal-backdrop">
+
+              <div class="modal">
+
+                <div class="modal-header">
+
+                  <div>
+
+                    <h2>
+                      ${
+                        edit
+                          ? "แก้ไขผู้ใช้งาน"
+                          : "เพิ่มผู้ใช้งาน"
+                      }
+                    </h2>
+
+                  </div>
+
+                  <button
+                    class="modal-close"
+                    onclick="App.closeModal()"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                  <form
+                    onsubmit="Users.submit(event)"
+                  >
+
+                    <input
+                      type="hidden"
+                      id="userId"
+                      value="${
+                        edit
+                          ? Utils.escapeHtml(row.id)
+                          : ""
+                      }"
+                    >
+
+
+                    <div class="form-group">
+
+                      <label>
+                        Username
+                      </label>
+
+                      <input
+                        id="userUsername"
+                        required
+                        type="text"
+                        value="${
+                          edit
+                            ? Utils.escapeHtml(row.username)
+                            : ""
+                        }"
+                      >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                      <label>
+                        ชื่อผู้ใช้งาน
+                      </label>
+
+                      <input
+                        id="userDisplayName"
+                        required
+                        type="text"
+                        value="${
+                          edit
+                            ? Utils.escapeHtml(row.displayName)
+                            : ""
+                        }"
+                      >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                      <label>
+                        รหัสผ่าน
+                      </label>
+
+                      <input
+                        id="userPassword"
+                        type="password"
+                        ${
+                          edit
+                            ? ""
+                            : "required"
+                        }
+                        autocomplete="new-password"
+                        placeholder="${
+                          edit
+                            ? "เว้นว่างหากไม่เปลี่ยน"
+                            : ""
+                        }"
+                      >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                      <label>
+                        สิทธิ์
+                      </label>
+
+                      <select
+                        id="userRole"
+                      >
+
+                        <option value="ADMIN">
+                          ADMIN
+                        </option>
+
+                        <option value="STAFF">
+                          STAFF
+                        </option>
+
+                        <option value="CHECKER">
+                          CHECKER
+                        </option>
+
+                        <option value="APPROVER">
+                          APPROVER
+                        </option>
+
+                      </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                      <label>
+                        สถานะ
+                      </label>
+
+                      <select
+                        id="userStatus"
+                      >
+
+                        <option value="ACTIVE">
+                          ใช้งาน
+                        </option>
+
+                        <option value="INACTIVE">
+                          ปิดใช้งาน
+                        </option>
+
+                      </select>
+
+                    </div>
+
+
+                    <div class="modal-actions">
+
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="App.closeModal()"
+                      >
+                        ยกเลิก
+                      </button>
+
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                      >
+                        บันทึก
+                      </button>
+
+                    </div>
+
+                  </form>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+
+          App.openModal(
+            html
+          );
+
+
+          if (edit) {
+
+            document.getElementById(
+              "userRole"
+            ).value =
+              row.role || "STAFF";
+
+
+            document.getElementById(
+              "userStatus"
+            ).value =
+              row.status || "ACTIVE";
+
+          }
+
+        },
+
+
+      submit:
+        async function(event) {
+
+          event.preventDefault();
+
+
+          const data = {
+
+            id:
+              document.getElementById(
+                "userId"
+              ).value,
+
+            username:
+              document.getElementById(
+                "userUsername"
+              ).value.trim(),
+
+            displayName:
+              document.getElementById(
+                "userDisplayName"
+              ).value.trim(),
+
+            password:
+              document.getElementById(
+                "userPassword"
+              ).value,
+
+            role:
+              document.getElementById(
+                "userRole"
+              ).value,
+
+            status:
+              document.getElementById(
+                "userStatus"
+              ).value
+
+          };
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังบันทึกผู้ใช้งาน..."
+            );
+
+
+            await API.post(
+              "saveUser",
+              data
+            );
+
+
+            UI.loading(
+              false
+            );
+
+
+            App.closeModal();
+
+
+            await UI.success(
+              "บันทึกสำเร็จ"
+            );
+
+
+            await Users.load(
+              STATE.users.page || 1
+            );
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       SETTINGS
+    ========================================================== */
+
+    const Settings = {
+
+      load:
+        async function() {
+
+          const settings =
+            await API.get(
+              "settings"
+            );
+
+
+          STATE.settings =
+            settings;
+
+
+          const ids = {
+
+            organizationName:
+              "settingOrganizationName",
+
+            organizationAddress:
+              "settingOrganizationAddress",
+
+            organizationPhone:
+              "settingOrganizationPhone",
+
+            organizationEmail:
+              "settingOrganizationEmail",
+
+            organizationTaxId:
+              "settingOrganizationTaxId",
+
+            paymentOrderPrefix:
+              "settingPaymentOrderPrefix",
+
+            chequePrefix:
+              "settingChequePrefix",
+
+            payeePrefix:
+              "settingPayeePrefix",
+
+            defaultCurrency:
+              "settingDefaultCurrency",
+
+            requireApproval:
+              "settingRequireApproval",
+
+            allowEditApproved:
+              "settingAllowEditApproved"
+
+          };
+
+
+          Object.keys(ids)
+            .forEach(function(key) {
+
+              const element =
+                document.getElementById(
+                  ids[key]
+                );
+
+
+              if (
+                element &&
+                settings[key] !== undefined
+              ) {
+
+                element.value =
+                  settings[key];
+
+              }
+
+            });
+
+        },
+
+
+      save:
+        async function() {
+
+          const values = {
+
+            organizationName:
+              document.getElementById(
+                "settingOrganizationName"
+              ).value,
+
+            organizationAddress:
+              document.getElementById(
+                "settingOrganizationAddress"
+              ).value,
+
+            organizationPhone:
+              document.getElementById(
+                "settingOrganizationPhone"
+              ).value,
+
+            organizationEmail:
+              document.getElementById(
+                "settingOrganizationEmail"
+              ).value,
+
+            organizationTaxId:
+              document.getElementById(
+                "settingOrganizationTaxId"
+              ).value,
+
+            paymentOrderPrefix:
+              document.getElementById(
+                "settingPaymentOrderPrefix"
+              ).value,
+
+            chequePrefix:
+              document.getElementById(
+                "settingChequePrefix"
+              ).value,
+
+            payeePrefix:
+              document.getElementById(
+                "settingPayeePrefix"
+              ).value,
+
+            defaultCurrency:
+              document.getElementById(
+                "settingDefaultCurrency"
+              ).value,
+
+            requireApproval:
+              document.getElementById(
+                "settingRequireApproval"
+              ).value,
+
+            allowEditApproved:
+              document.getElementById(
+                "settingAllowEditApproved"
+              ).value
+
+          };
+
+
+          try {
+
+            UI.loading(
+              true,
+              "กำลังบันทึกการตั้งค่า..."
+            );
+
+
+            for (
+              const key of Object.keys(values)
+            ) {
+
+              await API.post(
+                "saveSettings",
+                {
+                  key:
+                    key,
+
+                  value:
+                    values[key]
+                }
+              );
+
+            }
+
+
+            UI.loading(
+              false
+            );
+
+
+            await UI.success(
+              "บันทึกการตั้งค่าสำเร็จ"
+            );
+
+
+            await App.loadSettings();
+
+
+          } catch(error) {
+
+            UI.loading(
+              false
+            );
+
+            UI.error(error);
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PRINTER
+    ========================================================== */
+
+    const Printer = {
+
+      loadSettings:
+        function() {
+
+          document.getElementById(
+            "printerPaperWidth"
+          ).value =
+            STATE.settings.printerPaperWidth ||
+            "80mm";
+
+
+          document.getElementById(
+            "printerType"
+          ).value =
+            STATE.settings.printerType ||
+            "ESC/POS";
+
+
+          document.getElementById(
+            "printerAutoCut"
+          ).value =
+            STATE.settings.autoCutPaper ||
+            "true";
+
+        },
+
+
+      connect:
+        async function() {
+
+          if (
+            !navigator.bluetooth
+          ) {
+
+            await UI.error(
+              new Error(
+                "เบราว์เซอร์นี้ไม่รองรับ Web Bluetooth"
+              )
+            );
+
+            return;
+
+          }
+
+
+          try {
+
+            const device =
+              await navigator.bluetooth.requestDevice({
+
+                acceptAllDevices:
+                  true,
+
+                optionalServices: [
+
+                  "000018f0-0000-1000-8000-00805f9b34fb",
+
+                  "00001101-0000-1000-8000-00805f9b34fb"
+
+                ]
+
+              });
+
+
+            STATE.printer.device =
+              device;
+
+
+            device.addEventListener(
+              "gattserverdisconnected",
+              function() {
+
+                Printer.setStatus(
+                  false,
+                  "เครื่องพิมพ์ถูกตัดการเชื่อมต่อ"
+                );
+
+              }
+            );
+
+
+            const server =
+              await device.gatt.connect();
+
+
+            const services =
+              await server.getPrimaryServices();
+
+
+            let characteristic =
+              null;
+
+
+            for (
+              const service of services
+            ) {
+
+              const characteristics =
+                await service.getCharacteristics();
+
+
+              for (
+                const item of characteristics
+              ) {
+
+                const properties =
+                  item.properties;
+
+
+                if (
+                  properties.write ||
+                  properties.writeWithoutResponse
+                ) {
+
+                  characteristic =
+                    item;
+
+                  break;
+
+                }
+
+              }
+
+
+              if (characteristic) {
+                break;
+              }
+
+            }
+
+
+            if (!characteristic) {
+
+              throw new Error(
+                "ไม่พบช่องสั่งพิมพ์ของเครื่องพิมพ์"
+              );
+
+            }
+
+
+            STATE.printer.characteristic =
+              characteristic;
+
+
+            STATE.printer.connected =
+              true;
+
+
+            Printer.setStatus(
+              true,
+              "เชื่อมต่อแล้ว: " +
+              (
+                device.name ||
+                "Bluetooth Printer"
+              )
+            );
+
+
+            await UI.success(
+              "เชื่อมต่อสำเร็จ",
+              device.name ||
+              "Bluetooth Printer"
+            );
+
+
+          } catch(error) {
+
+            Printer.setStatus(
+              false,
+              "เชื่อมต่อไม่สำเร็จ"
+            );
+
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      setStatus:
+        function(
+          connected,
+          description
+        ) {
+
+          const icon =
+            document.getElementById(
+              "printerStatusIcon"
+            );
+
+
+          const text =
+            document.getElementById(
+              "printerStatusText"
+            );
+
+
+          const desc =
+            document.getElementById(
+              "printerStatusDescription"
+            );
+
+
+          if (connected) {
+
+            icon.classList.add(
+              "connected"
+            );
+
+            text.textContent =
+              "เชื่อมต่อแล้ว";
+
+            desc.textContent =
+              description ||
+              "เครื่องพิมพ์พร้อมใช้งาน";
+
+          } else {
+
+            icon.classList.remove(
+              "connected"
+            );
+
+            text.textContent =
+              "ยังไม่ได้เชื่อมต่อ";
+
+            desc.textContent =
+              description ||
+              "กรุณาเชื่อมต่อเครื่องพิมพ์";
+
+          }
+
+        },
+
+
+      write:
+        async function(
+          data
+        ) {
+
+          if (
+            !STATE.printer.connected ||
+            !STATE.printer.characteristic
+          ) {
+
+            throw new Error(
+              "กรุณาเชื่อมต่อเครื่องพิมพ์ก่อน"
+            );
+
+          }
+
+
+          const characteristic =
+            STATE.printer.characteristic;
+
+
+          const chunkSize =
+            180;
+
+
+          for (
+            let i = 0;
+            i < data.length;
+            i += chunkSize
+          ) {
+
+            const chunk =
+              data.slice(
+                i,
+                i + chunkSize
+              );
+
+
+            if (
+              characteristic.writeValueWithoutResponse
+            ) {
+
+              await characteristic
+                .writeValueWithoutResponse(
+                  chunk
+                );
+
+            } else {
+
+              await characteristic
+                .writeValue(
+                  chunk
+                );
+
+            }
+
+          }
+
+        },
+
+
+      testPrint:
+        async function() {
+
+          try {
+
+            const text =
+              Printer.buildTestPrint();
+
+
+            const encoder =
+              new TextEncoder();
+
+
+            const data =
+              encoder.encode(
+                text
+              );
+
+
+            if (
+              STATE.printer.connected
+            ) {
+
+              await Printer.write(
+                data
+              );
+
+
+              await UI.success(
+                "ส่งงานพิมพ์แล้ว"
+              );
+
+
+              await Printer.log(
+                "TEST",
+                "",
+                "TEST",
+                true,
+                "พิมพ์ทดสอบสำเร็จ"
+              );
+
+            } else {
+
+              Print.browserPrint(
+                text
+              );
+
+            }
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      buildTestPrint:
+        function() {
+
+          const ESC =
+            "\x1B";
+
+          const GS =
+            "\x1D";
+
+          return (
+
+            ESC + "@" +
+
+            ESC + "a" + "\x01" +
+
+            "TNBJO\n" +
+
+            "PAYMENT ORDER SYSTEM\n" +
+
+            "------------------------------\n" +
+
+            ESC + "a" + "\x00" +
+
+            "Printer Test\n" +
+
+            "Paper Width : 80mm\n" +
+
+            "Printer     : ESC/POS\n" +
+
+            "Date        : " +
+            new Date().toLocaleString(
+              "th-TH"
+            ) +
+            "\n" +
+
+            "------------------------------\n" +
+
+            ESC + "a" + "\x01" +
+
+            "PRINT TEST SUCCESS\n\n\n" +
+
+            GS + "V" + "\x00"
+
+          );
+
+        },
+
+
+      log:
+        async function(
+          type,
+          id,
+          no,
+          success,
+          message
+        ) {
+
+          try {
+
+            await API.post(
+              "printLog",
+              {
+
+                documentType:
+                  type,
+
+                documentId:
+                  id,
+
+                documentNo:
+                  no,
+
+                printerName:
+                  document.getElementById(
+                    "printerName"
+                  ).value,
+
+                printerType:
+                  "ESC/POS",
+
+                paperWidth:
+                  "80mm",
+
+                printMode:
+                  "WEB",
+
+                printCount:
+                  1,
+
+                success:
+                  success,
+
+                message:
+                  message,
+
+                userAgent:
+                  navigator.userAgent
+
+              }
+            );
+
+          } catch(error) {
+
+            console.error(
+              error
+            );
+
+          }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PRINT
+    ========================================================== */
+
+    const Print = {
+
+      openPaymentSearch:
+        async function() {
+
+          try {
+
+            const data =
+              await API.get(
+                "paymentOrders",
+                {
+                  page: 1,
+                  pageSize: 50
+                }
+              );
+
+
+            Print.openSelection(
+              "เลือกใบสั่งจ่าย",
+              data.data,
+              "payment"
+            );
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      openChequeSearch:
+        async function() {
+
+          try {
+
+            const data =
+              await API.get(
+                "cheques",
+                {
+                  page: 1,
+                  pageSize: 50
+                }
+              );
+
+
+            Print.openSelection(
+              "เลือกเช็ค",
+              data.data,
+              "cheque"
+            );
+
+          } catch(error) {
+
+            UI.error(error);
+
+          }
+
+        },
+
+
+      openSelection:
+        function(
+          title,
+          rows,
+          type
+        ) {
+
+          let options =
+            "";
+
+
+          rows.forEach(function(row) {
+
+            const id =
+              Utils.escapeHtml(
+                row.id
+              );
+
+
+            const no =
+              type === "payment"
+                ? row.documentNo
+                : row.chequeNo;
+
+
+            const name =
+              row.payeeName ||
+              "";
+
+
+            options += `
+
+              <button
+                type="button"
+                class="selection-item"
+                onclick="${
+                  type === "payment"
+                    ? "Print.selectPayment('" + id + "')"
+                    : "Print.selectCheque('" + id + "')"
+                }"
+              >
+
+                <div>
+
+                  <strong>
+                    ${Utils.escapeHtml(no)}
+                  </strong>
+
+                  <span>
+                    ${Utils.escapeHtml(name)}
+                  </span>
+
+                </div>
+
+                <div>
+                  ฿${Utils.formatMoney(
+                    row.amount
+                  )}
+                </div>
+
+              </button>
+
+            `;
+
+          });
+
+
+          if (!options) {
+
+            options =
+              UI.empty(
+                "ไม่พบเอกสาร"
+              );
+
+          }
+
+
+          App.openModal(`
+
+            <div class="modal-backdrop">
+
+              <div class="modal modal-lg">
+
+                <div class="modal-header">
+
+                  <h2>
+                    ${Utils.escapeHtml(title)}
+                  </h2>
+
+                  <button
+                    class="modal-close"
+                    onclick="App.closeModal()"
+                  >
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                  <div class="selection-list">
+                    ${options}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `);
+
+        },
+
+
+      selectPayment:
+        async function(id) {
+
+          App.closeModal();
+
+          await PaymentOrders.print(
+            id
+          );
+
+        },
+
+
+      selectCheque:
+        async function(id) {
+
+          App.closeModal();
+
+          await Cheques.print(
+            id
+          );
+
+        },
+
+
+      printPaymentOrder:
+        async function(row) {
+
+          const organization =
+            STATE.settings.organizationName ||
+            "หน่วยงานของคุณ";
+
+
+          const text =
+            Print.buildPaymentReceipt(
+              row
+            );
+
+
+          if (
+            STATE.printer.connected
+          ) {
+
+            try {
+
+              const encoder =
+                new TextEncoder();
+
+
+              await Printer.write(
+                encoder.encode(
+                  text
+                )
+              );
+
+
+              await Printer.log(
+                "PAYMENT_ORDER",
+                row.id,
+                row.documentNo,
+                true,
+                "พิมพ์ใบสั่งจ่ายสำเร็จ"
+              );
+
+
+              await UI.success(
+                "พิมพ์สำเร็จ",
+                row.documentNo
+              );
+
+
+            } catch(error) {
+
+              UI.error(error);
+
+            }
+
+          } else {
+
+            Print.browserPrint(
+              Print.buildPaymentHTML(
+                row,
+                organization
+              )
+            );
+
+          }
+
+        },
+
+
+      printCheque:
+        async function(row) {
+
+          const text =
+            Print.buildChequeReceipt(
+              row
+            );
+
+
+          if (
+            STATE.printer.connected
+          ) {
+
+            try {
+
+              const encoder =
+                new TextEncoder();
+
+
+              await Printer.write(
+                encoder.encode(
+                  text
+                )
+              );
+
+
+              await Printer.log(
+                "CHEQUE",
+                row.id,
+                row.chequeNo,
+                true,
+                "พิมพ์เช็คสำเร็จ"
+              );
+
+
+              await API.post(
+                "markChequePrinted",
+                {
+                  id:
+                    row.id
+                }
+              );
+
+
+              await UI.success(
+                "พิมพ์สำเร็จ",
+                row.chequeNo
+              );
+
+
+            } catch(error) {
+
+              UI.error(error);
+
+            }
+
+          } else {
+
+            Print.browserPrint(
+              Print.buildChequeHTML(
+                row
+              )
+            );
+
+          }
+
+        },
+
+
+      buildPaymentReceipt:
+        function(row) {
+
+          const ESC =
+            "\x1B";
+
+          const GS =
+            "\x1D";
+
+
+          let text = "";
+
+
+          text +=
+            ESC + "@";
+
+
+          text +=
+            ESC + "a" + "\x01";
+
+
+          text +=
+            "TNBJO\n";
+
+
+          text +=
+            "ใบสั่งจ่าย\n";
+
+
+          text +=
+            "PAYMENT ORDER\n";
+
+
+          text +=
+            "================================\n";
+
+
+          text +=
+            ESC + "a" + "\x00";
+
+
+          text +=
+            "เลขที่ : " +
+            row.documentNo +
+            "\n";
+
+
+          text +=
+            "วันที่ : " +
+            Utils.formatDate(
+              row.documentDate
+            ) +
+            "\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            "จ่ายให้\n" +
+            row.payeeName +
+            "\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            row.description +
+            "\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            "จำนวนเงิน : " +
+            Utils.formatMoney(
+              row.amount
+            ) +
+            " บาท\n";
+
+
+          text +=
+            "(" +
+            row.amountText +
+            ")\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          if (
+            row.paymentMethod
+          ) {
+
+            text +=
+              "วิธีการจ่าย : " +
+              row.paymentMethod +
+              "\n";
+
+          }
+
+
+          if (
+            row.referenceNo
+          ) {
+
+            text +=
+              "อ้างอิง : " +
+              row.referenceNo +
+              "\n";
+
+          }
+
+
+          text +=
+            "================================\n";
+
+
+          text +=
+            "ผู้จัดทำ ______________________\n\n";
+
+
+          text +=
+            "ผู้ตรวจสอบ ____________________\n\n";
+
+
+          text +=
+            "ผู้อนุมัติ ______________________\n";
+
+
+          text +=
+            "\n\n\n";
+
+
+          text +=
+            GS + "V" + "\x00";
+
+
+          return text;
+
+        },
+
+
+      buildChequeReceipt:
+        function(row) {
+
+          const ESC =
+            "\x1B";
+
+          const GS =
+            "\x1D";
+
+
+          let text = "";
+
+
+          text +=
+            ESC + "@";
+
+
+          text +=
+            ESC + "a" + "\x01";
+
+
+          text +=
+            "TNBJO\n";
+
+
+          text +=
+            "CHEQUE\n";
+
+
+          text +=
+            "================================\n";
+
+
+          text +=
+            ESC + "a" + "\x00";
+
+
+          text +=
+            "เลขที่เช็ค : " +
+            row.chequeNo +
+            "\n";
+
+
+          text +=
+            "วันที่ : " +
+            Utils.formatDate(
+              row.chequeDate
+            ) +
+            "\n";
+
+
+          text +=
+            "ธนาคาร : " +
+            (row.bankName || "-") +
+            "\n";
+
+
+          text +=
+            "สาขา : " +
+            (row.bankBranch || "-") +
+            "\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            "จ่ายให้ : " +
+            row.payeeName +
+            "\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            "จำนวนเงิน : " +
+            Utils.formatMoney(
+              row.amount
+            ) +
+            " บาท\n";
+
+
+          text +=
+            "(" +
+            row.amountText +
+            ")\n";
+
+
+          text +=
+            "--------------------------------\n";
+
+
+          text +=
+            "ผู้มีอำนาจลงนาม\n\n\n";
+
+
+          text +=
+            "================================\n";
+
+
+          text +=
+            "\n\n\n";
+
+
+          text +=
+            GS + "V" + "\x00";
+
+
+          return text;
+
+        },
+
+
+      buildPaymentHTML:
+        function(
+          row,
+          organization
+        ) {
+
+          return `
+
+            <!DOCTYPE html>
+
+            <html lang="th">
+
+            <head>
+
+              <meta charset="UTF-8">
+
+              <title>
+                ${Utils.escapeHtml(
+                  row.documentNo
+                )}
+              </title>
+
+              <style>
+
+                * {
+                  box-sizing: border-box;
+                }
+
+                body {
+                  margin: 0;
+                  padding: 10mm;
+                  font-family:
+                    "TH Sarabun PSK",
+                    "TH Sarabun New",
+                    Tahoma,
+                    sans-serif;
+                  font-size: 16pt;
+                }
+
+                .header {
+                  text-align: center;
+                  margin-bottom: 12px;
+                }
+
+                .title {
+                  font-size: 24pt;
+                  font-weight: bold;
+                }
+
+                .subtitle {
+                  font-size: 18pt;
+                }
+
+                .row {
+                  display: flex;
+                  margin: 5px 0;
+                }
+
+                .label {
+                  width: 130px;
+                  font-weight: bold;
+                }
+
+                .line {
+                  border-bottom: 1px solid #000;
+                  flex: 1;
+                }
+
+                .amount {
+                  text-align: right;
+                  font-size: 20pt;
+                  font-weight: bold;
+                  margin: 15px 0;
+                }
+
+                .signature {
+                  display: grid;
+                  grid-template-columns:
+                    repeat(3, 1fr);
+                  gap: 25px;
+                  margin-top: 50px;
+                  text-align: center;
+                }
+
+                .signature div {
+                  padding-top: 40px;
+                  border-top: 1px solid #000;
+                }
+
+                @media print {
+
+                  body {
+                    width: 80mm;
+                    padding: 4mm;
+                  }
+
+                  @page {
+                    size: 80mm auto;
+                    margin: 0;
+                  }
+
+                }
+
+              </style>
+
+            </head>
+
+            <body>
+
+              <div class="header">
+
+                <div>
+                  ${Utils.escapeHtml(
+                    organization
+                  )}
+                </div>
+
+                <div class="title">
+                  ใบสั่งจ่าย
+                </div>
+
+                <div class="subtitle">
+                  PAYMENT ORDER
+                </div>
+
+              </div>
+
+
+              <div class="row">
+
+                <div class="label">
+                  เลขที่
+                </div>
+
+                <div>
+                  ${Utils.escapeHtml(
+                    row.documentNo
+                  )}
+                </div>
+
+              </div>
+
+
+              <div class="row">
+
+                <div class="label">
+                  วันที่
+                </div>
+
+                <div>
+                  ${Utils.formatDate(
+                    row.documentDate
+                  )}
+                </div>
+
+              </div>
+
+
+              <div class="row">
+
+                <div class="label">
+                  จ่ายให้
+                </div>
+
+                <div>
+                  ${Utils.escapeHtml(
+                    row.payeeName
+                  )}
+                </div>
+
+              </div>
+
+
+              <hr>
+
+
+              <div>
+                ${Utils.escapeHtml(
+                  row.description
+                ).replace(
+                  /\n/g,
+                  "<br>"
+                )}
+              </div>
+
+
+              <div class="amount">
+
+                ${Utils.formatMoney(
+                  row.amount
+                )}
+                บาท
+
+                <br>
+
+                <span>
+                  (
+                  ${Utils.escapeHtml(
+                    row.amountText
+                  )}
+                  )
+                </span>
+
+              </div>
+
+
+              <div class="signature">
+
+                <div>
+                  ผู้จัดทำ
+                </div>
+
+                <div>
+                  ผู้ตรวจสอบ
+                </div>
+
+                <div>
+                  ผู้อนุมัติ
+                </div>
+
+              </div>
+
+
+              <script>
+                window.onload = function() {
+                  window.print();
+                };
+              <\/script>
+
+            </body>
+
+            </html>
+
+          `;
+
+        },
+
+
+      buildChequeHTML:
+        function(row) {
+
+          return `
+
+            <!DOCTYPE html>
+
+            <html lang="th">
+
+            <head>
+
+              <meta charset="UTF-8">
+
+              <title>
+                ${Utils.escapeHtml(
+                  row.chequeNo
+                )}
+              </title>
+
+              <style>
+
+                body {
+                  font-family:
+                    "TH Sarabun PSK",
+                    "TH Sarabun New",
+                    Tahoma,
+                    sans-serif;
+                  font-size: 18pt;
+                  padding: 6mm;
+                }
+
+                h1 {
+                  text-align: center;
+                  font-size: 24pt;
+                }
+
+                .row {
+                  margin: 8px 0;
+                }
+
+                .amount {
+                  text-align: right;
+                  font-size: 22pt;
+                  font-weight: bold;
+                }
+
+                @media print {
+
+                  @page {
+                    size: 80mm auto;
+                    margin: 0;
+                  }
+
+                  body {
+                    width: 80mm;
+                  }
+
+                }
+
+              </style>
+
+            </head>
+
+            <body>
+
+              <h1>
+                CHEQUE
+              </h1>
+
+              <div class="row">
+                เลขที่เช็ค :
+                ${Utils.escapeHtml(
+                  row.chequeNo
+                )}
+              </div>
+
+              <div class="row">
+                วันที่ :
+                ${Utils.formatDate(
+                  row.chequeDate
+                )}
+              </div>
+
+              <div class="row">
+                ธนาคาร :
+                ${Utils.escapeHtml(
+                  row.bankName || "-"
+                )}
+              </div>
+
+              <div class="row">
+                สาขา :
+                ${Utils.escapeHtml(
+                  row.bankBranch || "-"
+                )}
+              </div>
+
+              <hr>
+
+              <div class="row">
+                จ่ายให้ :
+                ${Utils.escapeHtml(
+                  row.payeeName
+                )}
+              </div>
+
+              <div class="amount">
+
+                ${Utils.formatMoney(
+                  row.amount
+                )}
+                บาท
+
+                <br>
+
+                (
+                ${Utils.escapeHtml(
+                  row.amountText
+                )}
+                )
+
+              </div>
+
+              <div style="
+                margin-top:50px;
+                text-align:center;
+              ">
+                ผู้มีอำนาจลงนาม
+              </div>
+
+
+              <script>
+                window.onload = function() {
+                  window.print();
+                };
+              <\/script>
+
+            </body>
+
+            </html>
+
+          `;
+
+        },
+
+
+      browserPrint:
+        function(content) {
+
+          const printWindow =
+            window.open(
+              "",
+              "_blank",
+              "width=600,height=800"
+            );
+
+
+          if (!printWindow) {
+
+            UI.error(
+              new Error(
+                "เบราว์เซอร์บล็อกหน้าต่างพิมพ์ กรุณาอนุญาต Popup"
+              )
+            );
+
+            return;
+
+          }
+
+
+          printWindow.document.open();
+
+          printWindow.document.write(
+            content
+          );
+
+          printWindow.document.close();
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PRINT LOGS
+    ========================================================== */
+
+    const PrintLogs = {
+
+      load:
+        async function(page) {
+
+          STATE.printLogs.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "printLogsTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "printLogs",
+              {
+
+                page:
+                  STATE.printLogs.page,
+
+                pageSize:
+                  STATE.printLogs.pageSize
+
+              }
+            );
+
+
+          STATE.printLogs =
+            data;
+
+
+          container.innerHTML =
+            Tables.printLogs(
+              data.data
+            );
+
+
+          document.getElementById(
+            "printLogsPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "PrintLogs.load"
+            );
+
+        }
+
+    };
+
+
+    /* =========================================================
+       AUDIT LOGS
+    ========================================================== */
+
+    const AuditLogs = {
+
+      load:
+        async function(page) {
+
+          STATE.auditLogs.page =
+            page || 1;
+
+
+          const container =
+            document.getElementById(
+              "auditLogsTable"
+            );
+
+
+          container.innerHTML =
+            UI.tableLoading();
+
+
+          const data =
+            await API.get(
+              "auditLogs",
+              {
+
+                page:
+                  STATE.auditLogs.page,
+
+                pageSize:
+                  STATE.auditLogs.pageSize
+
+              }
+            );
+
+
+          STATE.auditLogs =
+            data;
+
+
+          container.innerHTML =
+            Tables.auditLogs(
+              data.data
+            );
+
+
+          document.getElementById(
+            "auditLogsPagination"
+          ).innerHTML =
+            Pagination.render(
+              data.pagination,
+              "AuditLogs.load"
+            );
+
+        }
+
+    };
+
+
+    /* =========================================================
+       TABLES
+    ========================================================== */
+
+    const Tables = {
+
+      paymentOrders:
+        function(rows, compact = false) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบใบสั่งจ่าย"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    เลขที่
+                  </th>
+
+                  <th>
+                    วันที่
+                  </th>
+
+                  <th>
+                    ผู้รับเงิน
+                  </th>
+
+                  <th>
+                    จำนวนเงิน
+                  </th>
+
+                  <th>
+                    สถานะ
+                  </th>
+
+                  ${
+                    compact
+                      ? ""
+                      : "<th>ดำเนินการ</th>"
+                  }
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${Utils.escapeHtml(
+                      row.documentNo
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  ${Utils.formatDate(
+                    row.documentDate
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.payeeName
+                  )}
+                </td>
+
+                <td class="money">
+                  ฿${Utils.formatMoney(
+                    row.amount
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.status(
+                    row.status
+                  )}
+                </td>
+
+                ${
+                  compact
+                    ? ""
+                    : `
+                      <td>
+                        <div class="table-actions">
+
+                          <button
+                            class="icon-action"
+                            title="แก้ไข"
+                            onclick="PaymentOrders.openEdit('${row.id}')"
+                          >
+                            <i class="fa-solid fa-pen"></i>
+                          </button>
+
+                          <button
+                            class="icon-action"
+                            title="พิมพ์"
+                            onclick="PaymentOrders.print('${row.id}')"
+                          >
+                            <i class="fa-solid fa-print"></i>
+                          </button>
+
+                          ${
+                            row.status === "PENDING"
+                              ? `
+                                <button
+                                  class="icon-action success"
+                                  title="อนุมัติ"
+                                  onclick="PaymentOrders.approve('${row.id}')"
+                                >
+                                  <i class="fa-solid fa-check"></i>
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          ${
+                            row.status !== "CANCELLED"
+                              ? `
+                                <button
+                                  class="icon-action danger"
+                                  title="ยกเลิก"
+                                  onclick="PaymentOrders.cancel('${row.id}')"
+                                >
+                                  <i class="fa-solid fa-ban"></i>
+                                </button>
+                              `
+                              : ""
+                          }
+
+                        </div>
+                      </td>
+                    `
+                }
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        },
+
+
+      cheques:
+        function(rows, compact = false) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบเช็ค"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    เลขที่เช็ค
+                  </th>
+
+                  <th>
+                    วันที่
+                  </th>
+
+                  <th>
+                    จ่ายให้
+                  </th>
+
+                  <th>
+                    จำนวนเงิน
+                  </th>
+
+                  <th>
+                    สถานะ
+                  </th>
+
+                  ${
+                    compact
+                      ? ""
+                      : "<th>ดำเนินการ</th>"
+                  }
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  <strong>
+                    ${Utils.escapeHtml(
+                      row.chequeNo
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  ${Utils.formatDate(
+                    row.chequeDate
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.payeeName
+                  )}
+                </td>
+
+                <td class="money">
+                  ฿${Utils.formatMoney(
+                    row.amount
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.status(
+                    row.status
+                  )}
+                </td>
+
+                ${
+                  compact
+                    ? ""
+                    : `
+                      <td>
+
+                        <div class="table-actions">
+
+                          ${
+                            row.printed !== "true"
+                              ? `
+                                <button
+                                  class="icon-action"
+                                  title="แก้ไข"
+                                  onclick="Cheques.openEdit('${row.id}')"
+                                >
+                                  <i class="fa-solid fa-pen"></i>
+                                </button>
+                              `
+                              : ""
+                          }
+
+                          <button
+                            class="icon-action"
+                            title="พิมพ์"
+                            onclick="Cheques.print('${row.id}')"
+                          >
+                            <i class="fa-solid fa-print"></i>
+                          </button>
+
+                          ${
+                            row.status !== "CANCELLED" &&
+                            row.printed !== "true"
+                              ? `
+                                <button
+                                  class="icon-action danger"
+                                  title="ยกเลิก"
+                                  onclick="Cheques.cancel('${row.id}')"
+                                >
+                                  <i class="fa-solid fa-ban"></i>
+                                </button>
+                              `
+                              : ""
+                          }
+
+                        </div>
+
+                      </td>
+                    `
+                }
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        },
+
+
+      payees:
+        function(rows) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบผู้รับเงิน"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    รหัส
+                  </th>
+
+                  <th>
+                    ชื่อ
+                  </th>
+
+                  <th>
+                    ประเภท
+                  </th>
+
+                  <th>
+                    โทรศัพท์
+                  </th>
+
+                  <th>
+                    ธนาคาร
+                  </th>
+
+                  <th>
+                    สถานะ
+                  </th>
+
+                  <th>
+                    ดำเนินการ
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.code
+                  )}
+                </td>
+
+                <td>
+                  <strong>
+                    ${Utils.escapeHtml(
+                      row.name
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.type || "-"
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.phone || "-"
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.bankName || "-"
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.status(
+                    row.status
+                  )}
+                </td>
+
+                <td>
+
+                  <div class="table-actions">
+
+                    <button
+                      class="icon-action"
+                      onclick="Payees.openEdit('${row.id}')"
+                      title="แก้ไข"
+                    >
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        },
+
+
+      users:
+        function(rows) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบผู้ใช้งาน"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Username
+                  </th>
+
+                  <th>
+                    ชื่อ
+                  </th>
+
+                  <th>
+                    สิทธิ์
+                  </th>
+
+                  <th>
+                    สถานะ
+                  </th>
+
+                  <th>
+                    Login ล่าสุด
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.username
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.displayName
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.role
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.status(
+                    row.status
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.formatDateTime(
+                    row.lastLoginAt
+                  )}
+                </td>
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        },
+
+
+      printLogs:
+        function(rows) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบประวัติการพิมพ์"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    วันที่
+                  </th>
+
+                  <th>
+                    ประเภท
+                  </th>
+
+                  <th>
+                    เลขที่
+                  </th>
+
+                  <th>
+                    เครื่องพิมพ์
+                  </th>
+
+                  <th>
+                    ผลลัพธ์
+                  </th>
+
+                  <th>
+                    ผู้พิมพ์
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  ${Utils.formatDateTime(
+                    row.printedAt
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.documentType
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.documentNo
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.printerName || "-"
+                  )}
+                </td>
+
+                <td>
+                  ${
+                    row.success === "true"
+                      ? Utils.status("APPROVED")
+                      : Utils.status("CANCELLED")
+                  }
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.printedBy
+                  )}
+                </td>
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        },
+
+
+      auditLogs:
+        function(rows) {
+
+          if (
+            !rows ||
+            rows.length === 0
+          ) {
+
+            return UI.empty(
+              "ไม่พบประวัติการทำรายการ"
+            );
+
+          }
+
+
+          let html = `
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    วันที่
+                  </th>
+
+                  <th>
+                    Action
+                  </th>
+
+                  <th>
+                    Module
+                  </th>
+
+                  <th>
+                    เลขที่
+                  </th>
+
+                  <th>
+                    รายละเอียด
+                  </th>
+
+                  <th>
+                    ผู้ทำรายการ
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+          `;
+
+
+          rows.forEach(function(row) {
+
+            html += `
+
+              <tr>
+
+                <td>
+                  ${Utils.formatDateTime(
+                    row.createdAt
+                  )}
+                </td>
+
+                <td>
+                  <strong>
+                    ${Utils.escapeHtml(
+                      row.action
+                    )}
+                  </strong>
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.module
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.recordNo
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.detail
+                  )}
+                </td>
+
+                <td>
+                  ${Utils.escapeHtml(
+                    row.createdBy
+                  )}
+                </td>
+
+              </tr>
+
+            `;
+
+          });
+
+
+          html += `
+
+              </tbody>
+
+            </table>
+
+          `;
+
+
+          return html;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       PAGINATION
+    ========================================================== */
+
+    const Pagination = {
+
+      render:
+        function(
+          pagination,
+          functionName
+        ) {
+
+          if (
+            !pagination ||
+            pagination.totalPages <= 1
+          ) {
+
+            return "";
+
+          }
+
+
+          let html =
+            '<div class="pagination-inner">';
+
+
+          if (
+            pagination.page > 1
+          ) {
+
+            html += `
+
+              <button
+                class="page-button"
+                onclick="${functionName}(${pagination.page - 1})"
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+
+            `;
+
+          }
+
+
+          const start =
+            Math.max(
+              1,
+              pagination.page - 2
+            );
+
+
+          const end =
+            Math.min(
+              pagination.totalPages,
+              pagination.page + 2
+            );
+
+
+          for (
+            let i = start;
+            i <= end;
+            i++
+          ) {
+
+            html += `
+
+              <button
+                class="page-button ${
+                  i === pagination.page
+                    ? "active"
+                    : ""
+                }"
+                onclick="${functionName}(${i})"
+              >
+                ${i}
+              </button>
+
+            `;
+
+          }
+
+
+          if (
+            pagination.page <
+            pagination.totalPages
+          ) {
+
+            html += `
+
+              <button
+                class="page-button"
+                onclick="${functionName}(${pagination.page + 1})"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+
+            `;
+
+          }
+
+
+          html +=
+            "</div>";
+
+
+          return html;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       THAI BAHT
+    ========================================================== */
+
+    const ThaiBaht = {
+
+      numberToText:
+        function(number) {
+
+          number =
+            Math.round(
+              Number(number || 0) *
+              100
+            ) / 100;
+
+
+          if (
+            number === 0
+          ) {
+
+            return "ศูนย์บาทถ้วน";
+
+          }
+
+
+          const integer =
+            Math.floor(
+              number
+            );
+
+
+          const satang =
+            Math.round(
+              (
+                number -
+                integer
+              ) *
+              100
+            );
+
+
+          let result =
+            ThaiBaht.read(
+              integer
+            ) +
+            "บาท";
+
+
+          if (
+            satang === 0
+          ) {
+
+            result +=
+              "ถ้วน";
+
+          } else {
+
+            result +=
+              ThaiBaht.read(
+                satang
+              ) +
+              "สตางค์";
+
+          }
+
+
+          return result;
+
+        },
+
+
+      read:
+        function(number) {
+
+          if (
+            number === 0
+          ) {
+
+            return "ศูนย์";
+
+          }
+
+
+          const digit = [
+
+            "ศูนย์",
+
+            "หนึ่ง",
+
+            "สอง",
+
+            "สาม",
+
+            "สี่",
+
+            "ห้า",
+
+            "หก",
+
+            "เจ็ด",
+
+            "แปด",
+
+            "เก้า"
+
+          ];
+
+
+          const position = [
+
+            "",
+
+            "สิบ",
+
+            "ร้อย",
+
+            "พัน",
+
+            "หมื่น",
+
+            "แสน"
+
+          ];
+
+
+          function section(n) {
+
+            const text =
+              String(n);
+
+            let output =
+              "";
+
+
+            for (
+              let i = 0;
+              i < text.length;
+              i++
+            ) {
+
+              const d =
+                Number(
+                  text[i]
+                );
+
+
+              const p =
+                text.length -
+                i -
+                1;
+
+
+              if (
+                d === 0
+              ) {
+
+                continue;
+
+              }
+
+
+              if (
+                p === 0
+              ) {
+
+                if (
+                  d === 1 &&
+                  text.length > 1
+                ) {
+
+                  output +=
+                    "เอ็ด";
+
+                } else {
+
+                  output +=
+                    digit[d];
+
+                }
+
+              } else if (
+                p === 1
+              ) {
+
+                if (
+                  d === 1
+                ) {
+
+                  output +=
+                    "สิบ";
+
+                } else if (
+                  d === 2
+                ) {
+
+                  output +=
+                    "ยี่สิบ";
+
+                } else {
+
+                  output +=
+                    digit[d] +
+                    "สิบ";
+
+                }
+
+              } else {
+
+                output +=
+                  digit[d] +
+                  position[p];
+
+              }
+
+            }
+
+
+            return output;
+
+          }
+
+
+          const million =
+            Math.floor(
+              number / 1000000
+            );
+
+
+          const remainder =
+            number % 1000000;
+
+
+          let result =
+            "";
+
+
+          if (
+            million > 0
+          ) {
+
+            result +=
+              section(million) +
+              "ล้าน";
+
+          }
+
+
+          if (
+            remainder > 0
+          ) {
+
+            result +=
+              section(remainder);
+
+          }
+
+
+          return result;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       START
+    ========================================================== */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function() {
+
+        App.init();
+
+      }
+    );
+
+  </script>
+
+</body>
+  </html>
