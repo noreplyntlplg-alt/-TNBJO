@@ -1,1 +1,1182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบออกใบสั่งจ่าย / พิมพ์เช็ค - Powered by TNBJO</title>
 
+    <!-- Google Fonts: TH Sarabun (Sarabun) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons v6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- เชื่อมโยงไฟล์ตกแต่งสไตล์ style.css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header & Navigation Bar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-logo">
+                <i class="fa-solid fa-file-invoice-dollar logo-icon"></i>
+                <div class="brand-title">
+                    <h1>ระบบออกใบสั่งจ่ายและพิมพ์เช็ค</h1>
+                    <span class="sub-title">Powered by TNBJO</span>
+                </div>
+            </div>
+            <div class="header-status">
+                <div id="printerStatusBadge" class="status-badge disconnected">
+                    <i class="fa-solid fa-print"></i>
+                    <span id="printerStatusText">เครื่องพิมพ์: ยังไม่เชื่อมต่อ</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Menu Bar -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="switchTab('dashboardTab')">
+                <i class="fa-solid fa-chart-line"></i> หน้าหลัก / สรุปภาพรวม
+            </button>
+            <button class="nav-btn" onclick="switchTab('createFormTab')">
+                <i class="fa-solid fa-pen-to-square"></i> ออกใบสั่งจ่ายใหม่
+            </button>
+            <button class="nav-btn" onclick="switchTab('recordsListTab')">
+                <i class="fa-solid fa-list-check"></i> รายการใบสั่งจ่ายทั้งหมด
+            </button>
+            <button class="nav-btn" onclick="switchTab('settingsTab')">
+                <i class="fa-solid fa-sliders"></i> ตั้งค่าระบบ & เครื่องพิมพ์
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="dashboardTab" class="tab-content active">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-gauge-high"></i> แผงควบคุมและสรุปภาพรวม</h2>
+                <p>ข้อมูลสถิติการออกใบสั่งจ่ายและเช็คราชการ</p>
+            </div>
+
+            <div class="dashboard-cards">
+                <div class="stat-card primary">
+                    <div class="card-icon"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="card-info">
+                        <span class="card-label">รายการทั้งหมด</span>
+                        <h3 id="statTotalDocs">0 รายการ</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                    <div class="card-info">
+                        <span class="card-label">ยอดเงินรวมทั้งหมด</span>
+                        <h3 id="statTotalAmount">0.00 บาท</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div class="card-info">
+                        <span class="card-label">รายการรอพิมพ์</span>
+                        <h3 id="statPendingPrint">0 รายการ</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card info">
+                    <div class="card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="card-info">
+                        <span class="card-label">พิมพ์แล้ว</span>
+                        <h3 id="statPrinted">0 รายการ</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-orders-section">
+                <div class="table-header-flex">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> รายการสั่งจ่ายล่าสุด</h3>
+                    <button class="btn btn-secondary btn-sm" onclick="loadAllRecords()">
+                        <i class="fa-solid fa-rotate"></i> รีเฟรชข้อมูล
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="official-table">
+                        <thead>
+                            <tr>
+                                <th>เลขที่ใบสั่งจ่าย</th>
+                                <th>วันที่</th>
+                                <th>สั่งจ่ายให้ (ผู้รับเงิน)</th>
+                                <th>จำนวนเงิน (บาท)</th>
+                                <th>เลขที่เช็ค</th>
+                                <th>สถานะ</th>
+                                <th>จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTbody">
+                            <tr>
+                                <td colspan="7" class="text-center">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: CREATE / EDIT FORM -->
+        <section id="createFormTab" class="tab-content">
+            <div class="section-title">
+                <h2 id="formTitleText"><i class="fa-solid fa-file-circle-plus"></i> ออกใบสั่งจ่าย / พิมพ์เช็คใหม่</h2>
+                <p>กรอกข้อมูลรายละเอียดการเบิกจ่ายตามระเบียบทางการ</p>
+            </div>
+
+            <form id="paymentOrderForm" onsubmit="handleFormSubmit(event)" class="official-form">
+                <input type="hidden" id="recordId" value="">
+
+                <div class="form-grid">
+                    <!-- แถวที่ 1: เลขที่ใบสั่งจ่าย & วันที่ -->
+                    <div class="form-group">
+                        <label for="doc_no"><i class="fa-solid fa-hashtag"></i> เลขที่ใบสั่งจ่าย <span class="required">*</span></label>
+                        <input type="text" id="doc_no" required placeholder="เช่น PO69/001">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doc_date"><i class="fa-solid fa-calendar-day"></i> วันที่ออกใบสั่งจ่าย <span class="required">*</span></label>
+                        <input type="date" id="doc_date" required>
+                    </div>
+
+                    <!-- แถวที่ 2: เลขที่เช็ค & วันที่เช็ค -->
+                    <div class="form-group">
+                        <label for="cheque_no"><i class="fa-solid fa-money-check"></i> เลขที่เช็ค</label>
+                        <input type="text" id="cheque_no" placeholder="เช่น 10293847">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cheque_date"><i class="fa-solid fa-calendar-check"></i> วันที่ลงบนเช็ค</label>
+                        <input type="date" id="cheque_date">
+                    </div>
+
+                    <!-- แถวที่ 3: ผู้รับเงิน (สั่งจ่าย) -->
+                    <div class="form-group full-width">
+                        <label for="payee_name"><i class="fa-solid fa-user-tie"></i> สั่งจ่ายให้ (ชื่อผู้รับเงิน / หน่วยงาน) <span class="required">*</span></label>
+                        <input type="text" id="payee_name" required placeholder="ระบุชื่อบุคคล ห้างหุ้นส่วน หรือบริษัทผู้รับเงิน">
+                    </div>
+
+                    <!-- แถวที่ 4: จำนวนเงินตัวเลข & ตัวอักษร -->
+                    <div class="form-group">
+                        <label for="amount_number"><i class="fa-solid fa-coins"></i> จำนวนเงิน (ตัวเลข) <span class="required">*</span></label>
+                        <input type="number" step="0.01" min="0" id="amount_number" required placeholder="0.00" oninput="autoConvertBahtText()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount_text"><i class="fa-solid fa-font"></i> จำนวนเงิน (ตัวอักษร)</label>
+                        <input type="text" id="amount_text" readonly placeholder="คำนวณอัตโนมัติ..." class="readonly-input">
+                    </div>
+
+                    <!-- แถวที่ 5: ธนาคาร, สาขา, เลขบัญชี -->
+                    <div class="form-group">
+                        <label for="bank_name"><i class="fa-solid fa-building-columns"></i> ธนาคาร</label>
+                        <select id="bank_name">
+                            <option value="ธนาคารกรุงไทย">ธนาคารกรุงไทย</option>
+                            <option value="ธนาคารออมสิน">ธนาคารออมสิน</option>
+                            <option value="ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร (ธ.ก.ส.)">ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร (ธ.ก.ส.)</option>
+                            <option value="ธนาคารกสิกรไทย">ธนาคารกสิกรไทย</option>
+                            <option value="ธนาคารไทยพาณิชย์">ธนาคารไทยพาณิชย์</option>
+                            <option value="ธนาคารกรุงเทพ">ธนาคารกรุงเทพ</option>
+                            <option value="อื่นๆ">อื่นๆ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_branch"><i class="fa-solid fa-code-branch"></i> สาขา</label>
+                        <input type="text" id="bank_branch" placeholder="เช่น สาขาศาลากลางจังหวัด">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_account"><i class="fa-solid fa-credit-card"></i> เลขที่บัญชี</label>
+                        <input type="text" id="bank_account" placeholder="เช่น 123-0-45678-9">
+                    </div>
+
+                    <!-- แถวที่ 6: ชำระค่า / รายละเอียด -->
+                    <div class="form-group full-width">
+                        <label for="payment_reason"><i class="fa-solid fa-align-left"></i> ชำระค่า / รายละเอียดการสั่งจ่าย <span class="required">*</span></label>
+                        <textarea id="payment_reason" rows="3" required placeholder="ระบุเหตุผลหรือรายละเอียดในการเบิกจ่ายเงิน"></textarea>
+                    </div>
+
+                    <!-- แถวที่ 7: สถานะ & ผู้ลงนาม -->
+                    <div class="form-group">
+                        <label for="status"><i class="fa-solid fa-flag"></i> สถานะเอกสาร</label>
+                        <select id="status">
+                            <option value="รอพิมพ์">รอพิมพ์</option>
+                            <option value="พิมพ์แล้ว">พิมพ์แล้ว</option>
+                            <option value="ยกเลิก">ยกเลิก</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="approver"><i class="fa-solid fa-signature"></i> ผู้มีอำนาจลงนาม / ผู้สั่งจ่าย</label>
+                        <input type="text" id="approver" placeholder="เช่น นายสมศักดิ์ รักชาติ (ผู้อำนวยการ...)">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetPaymentForm()">
+                        <i class="fa-solid fa-eraser"></i> ล้างข้อมูล
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="btn btn-danger hidden" onclick="cancelEditMode()">
+                        <i class="fa-solid fa-xmark"></i> ยกเลิกการแก้ไข
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- TAB 3: RECORDS LIST & SEARCH -->
+        <section id="recordsListTab" class="tab-content">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-table-list"></i> รายการใบสั่งจ่ายและเช็คทั้งหมด</h2>
+                <p>ค้นหา ตรวจสอบ พิมพ์ใบสั่งจ่าย หรือจัดการเอกสาร</p>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label for="searchKeyword"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาเอกสาร</label>
+                        <input type="text" id="searchKeyword" placeholder="ค้นหาเลขที่, ชื่อผู้รับเงิน, เช็ค..." onkeyup="filterRecords()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterStatus"><i class="fa-solid fa-filter"></i> กรองตามสถานะ</label>
+                        <select id="filterStatus" onchange="filterRecords()">
+                            <option value="ALL">-- แสดงทุกสถานะ --</option>
+                            <option value="รอพิมพ์">รอพิมพ์</option>
+                            <option value="พิมพ์แล้ว">พิมพ์แล้ว</option>
+                            <option value="ยกเลิก">ยกเลิก</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="official-table">
+                    <thead>
+                        <tr>
+                            <th>ลำดับ</th>
+                            <th>เลขที่ใบสั่งจ่าย</th>
+                            <th>วันที่สั่งจ่าย</th>
+                            <th>สั่งจ่ายให้</th>
+                            <th>จำนวนเงิน (บาท)</th>
+                            <th>เลขที่เช็ค</th>
+                            <th>สถานะ</th>
+                            <th class="text-center">จัดการเอกสาร & การพิมพ์</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allRecordsTbody">
+                        <tr>
+                            <td colspan="8" class="text-center">กำลังโหลดข้อมูล...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 4: SETTINGS & BLUETOOTH PRINTER -->
+        <section id="settingsTab" class="tab-content">
+            <div class="section-title">
+                <h2><i class="fa-solid fa-gears"></i> ตั้งค่าระบบ & เครื่องพิมพ์บลูทูธ</h2>
+                <p>จัดการการเชื่อมต่อ Google Sheets API และเครื่องพิมพ์ใบเสร็จ Thermal 80mm</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- ตั้งค่า API Google Sheets -->
+                <div class="setting-card">
+                    <h3><i class="fa-solid fa-database"></i> เชื่อมต่อฐานข้อมูล Google Sheets</h3>
+                    <p class="setting-desc">กรอก Web App URL ที่ได้จากการ Deploy โค้ด `Code.gs`</p>
+                    <div class="form-group">
+                        <label for="apiUrlInput">Google Apps Script Web App URL:</label>
+                        <input type="url" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveApiUrl()">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึก URL API
+                    </button>
+                    <button class="btn btn-secondary" onclick="testApiConnection()">
+                        <i class="fa-solid fa-plug"></i> ทดสอบการเชื่อมต่อ
+                    </button>
+                </div>
+
+                <!-- ตั้งค่าเครื่องพิมพ์บลูทูธ 80mm -->
+                <div class="setting-card">
+                    <h3><i class="fa-solid fa-print"></i> เครื่องพิมพ์ใบเสร็จบลูทูธ 80mm (ESC/POS)</h3>
+                    <p class="setting-desc">เชื่อมต่อผ่าน Web Bluetooth API เพื่อพิมพ์ใบสั่งจ่ายขนาด 80mm พร้อมระบบตัดกระดาษอัตโนมัติ</p>
+                    
+                    <div class="printer-controls">
+                        <div id="printerConnectionInfo" class="connection-info disconnected-box">
+                            <i class="fa-solid fa-circle-exclamation"></i> ยังไม่ได้เชื่อมต่อเครื่องพิมพ์
+                        </div>
+
+                        <div class="btn-group">
+                            <button id="btnConnectPrinter" class="btn btn-success" onclick="connectBluetoothPrinter()">
+                                <i class="fa-solid fa-bluetooth"></i> ค้นหา & เชื่อมต่อเครื่องพิมพ์
+                            </button>
+                            <button id="btnDisconnectPrinter" class="btn btn-danger hidden" onclick="disconnectBluetoothPrinter()">
+                                <i class="fa-solid fa-power-off"></i> ตัดการเชื่อมต่อ
+                            </button>
+                            <button class="btn btn-secondary" onclick="testPrintThermal80mm()">
+                                <i class="fa-solid fa-vial"></i> ทดสอบพิมพ์ & ตัดกระดาษ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: แสดงและพิมพ์ใบสั่งจ่ายทางการ (A4 / Official View) -->
+    <div id="officialViewModal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-contract"></i> เอกสารใบสั่งจ่ายทางการ (Powered by TNBJO)</h3>
+                <button class="close-modal-btn" onclick="closeOfficialModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="officialDocumentPrintArea">
+                <!-- เนื้อหาเอกสารแบบทางการจะถูกสร้างด้วย JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="printOfficialDocumentA4()">
+                    <i class="fa-solid fa-print"></i> พิมพ์เอกสาร (A4/PDF)
+                </button>
+                <button class="btn btn-info" onclick="triggerThermalPrintFromModal()">
+                    <i class="fa-solid fa-receipt"></i> พิมพ์สลิป 80mm (Bluetooth)
+                </button>
+                <button class="btn btn-secondary" onclick="closeOfficialModal()">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2026 ระบบออกใบสั่งจ่ายและพิมพ์เช็คทางการ - Powered by TNBJO. All Rights Reserved.</p>
+    </footer>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- MAIN JAVASCRIPT APP LOGIC -->
+    <script>
+        /**
+         * =========================================================================
+         * GLOBAL APP STATE & VARIABLES
+         * =========================================================================
+         */
+        let appState = {
+            apiUrl: localStorage.getItem('TNBJO_API_URL') || '',
+            records: [],
+            activeRecordForModal: null,
+            bluetoothDevice: null,
+            gattServer: null,
+            printCharacteristic: null
+        };
+
+        // Standard Bluetooth ESC/POS Service & Characteristic UUIDs
+        const PRINTER_UUIDS = {
+            services: [
+                '000018f0-0000-1000-8000-00805f9b34fb',
+                '0000ff00-0000-1000-8000-00805f9b34fb',
+                '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+            ],
+            characteristics: [
+                '00002af1-0000-1000-8000-00805f9b34fb',
+                '0000ff02-0000-1000-8000-00805f9b34fb',
+                '49535343-1e4d-4be9-bb71-aa621a371e4a'
+            ]
+        };
+
+        /**
+         * =========================================================================
+         * INITIALIZATION ON PAGE LOAD
+         * =========================================================================
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // ตั้งค่าวันที่ปัจจุบันในฟอร์มเป็นค่าเริ่มต้น
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('doc_date').value = today;
+            document.getElementById('cheque_date').value = today;
+
+            // โหลด URL API หากเคยบันทึกไว้
+            if (appState.apiUrl) {
+                document.getElementById('apiUrlInput').value = appState.apiUrl;
+                loadAllRecords();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ยังไม่ได้ตั้งค่า API URL',
+                    text: 'กรุณาไปที่เมนู "ตั้งค่าระบบ" เพื่อใส่ Google Apps Script Web App URL ก่อนเริ่มใช้งาน',
+                    confirmButtonText: 'ไปที่หน้าตั้งค่า'
+                }).then(() => {
+                    switchTab('settingsTab');
+                });
+            }
+        });
+
+        /**
+         * =========================================================================
+         * NAVIGATION & TAB SWITCHING
+         * =========================================================================
+         */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            
+            // หาปุ่ม Nav เพื่อไฮไลท์ active
+            const navButtons = document.querySelectorAll('.nav-btn');
+            if (tabId === 'dashboardTab') navButtons[0].classList.add('active');
+            if (tabId === 'createFormTab') navButtons[1].classList.add('active');
+            if (tabId === 'recordsListTab') navButtons[2].classList.add('active');
+            if (tabId === 'settingsTab') navButtons[3].classList.add('active');
+        }
+
+        /**
+         * =========================================================================
+         * THAI BAHT TEXT CONVERTER (แปลงตัวเลขเป็นตัวอักษรไทยบาท)
+         * =========================================================================
+         */
+        function autoConvertBahtText() {
+            const num = parseFloat(document.getElementById('amount_number').value);
+            if (isNaN(num) || num < 0) {
+                document.getElementById('amount_text').value = '';
+                return;
+            }
+            document.getElementById('amount_text').value = convertToThaiBahtText(num);
+        }
+
+        function convertToThaiBahtText(number) {
+            if (number === 0) return 'ศูนย์บาทถ้วน';
+
+            const txtNum = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+            const txtDigit = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+
+            let [baht, satang] = number.toFixed(2).split('.');
+            let bahtText = '';
+
+            // แปลงส่วนบาท
+            function readNumber(numStr) {
+                let res = '';
+                const len = numStr.length;
+                for (let i = 0; i < len; i++) {
+                    const digit = parseInt(numStr.charAt(i));
+                    const pos = len - i - 1;
+                    if (digit !== 0) {
+                        if (pos === 1 && digit === 1) {
+                            res += 'สิบ';
+                        } else if (pos === 1 && digit === 2) {
+                            res += 'ยี่สิบ';
+                        } else if (pos === 0 && digit === 1 && len > 1) {
+                            res += 'เอ็ด';
+                        } else {
+                            res += txtNum[digit] + txtDigit[pos];
+                        }
+                    }
+                }
+                return res;
+            }
+
+            // จัดการกรณีมากกว่าล้าน
+            if (baht.length > 6) {
+                const millionPart = baht.substring(0, baht.length - 6);
+                const remainPart = baht.substring(baht.length - 6);
+                bahtText = readNumber(millionPart) + 'ล้าน' + readNumber(remainPart);
+            } else {
+                bahtText = readNumber(baht);
+            }
+
+            bahtText += 'บาท';
+
+            // แปลงส่วนสตางค์
+            if (satang === '00') {
+                bahtText += 'ถ้วน';
+            } else {
+                bahtText += readNumber(satang) + 'สตางค์';
+            }
+
+            return bahtText;
+        }
+
+        /**
+         * =========================================================================
+         * API GOOGLE SHEETS CRUD OPERATIONS
+         * =========================================================================
+         */
+        function saveApiUrl() {
+            const url = document.getElementById('apiUrlInput').value.trim();
+            if (!url) {
+                Swal.fire('ข้อผิดพลาด', 'กรุณากรอก URL ให้ถูกต้อง', 'error');
+                return;
+            }
+            localStorage.setItem('TNBJO_API_URL', url);
+            appState.apiUrl = url;
+            Swal.fire('สำเร็จ', 'บันทึก API URL เรียบร้อยแล้ว', 'success');
+            loadAllRecords();
+        }
+
+        async function testApiConnection() {
+            if (!appState.apiUrl) {
+                Swal.fire('ข้อผิดพลาด', 'ยังไม่ได้ระบุ URL API', 'error');
+                return;
+            }
+            Swal.showLoading();
+            try {
+                const response = await fetch(appState.apiUrl + '?action=read');
+                const result = await response.json();
+                if (result.status === 'success') {
+                    Swal.fire('เชื่อมต่อสำเร็จ', 'การเชื่อมต่อกับ Google Sheets API สมบูรณ์พร้อมใช้งาน', 'success');
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', result.message || 'ไม่สามารถอ่านข้อมูลได้', 'error');
+                }
+            } catch (err) {
+                Swal.fire('การเชื่อมต่อล้มเหลว', 'ไม่สามารถเชื่อมต่อ API ได้: ' + err.message, 'error');
+            }
+        }
+
+        async function loadAllRecords() {
+            if (!appState.apiUrl) return;
+            try {
+                const response = await fetch(appState.apiUrl + '?action=read');
+                const result = await response.json();
+                if (result.status === 'success') {
+                    appState.records = result.data || [];
+                    renderDashboardStats();
+                    renderRecentOrdersTable();
+                    renderAllRecordsTable(appState.records);
+                } else {
+                    console.error('Error loading data:', result.message);
+                }
+            } catch (err) {
+                console.error('Fetch error:', err);
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!appState.apiUrl) {
+                Swal.fire('แจ้งเตือน', 'กรุณาตั้งค่า URL API ก่อนทำการบันทึก', 'warning');
+                return;
+            }
+
+            const recordId = document.getElementById('recordId').value;
+            const formData = {
+                doc_no: document.getElementById('doc_no').value.trim(),
+                doc_date: document.getElementById('doc_date').value,
+                cheque_no: document.getElementById('cheque_no').value.trim(),
+                cheque_date: document.getElementById('cheque_date').value,
+                payee_name: document.getElementById('payee_name').value.trim(),
+                amount_number: parseFloat(document.getElementById('amount_number').value),
+                amount_text: document.getElementById('amount_text').value,
+                bank_name: document.getElementById('bank_name').value,
+                bank_branch: document.getElementById('bank_branch').value.trim(),
+                bank_account: document.getElementById('bank_account').value.trim(),
+                payment_reason: document.getElementById('payment_reason').value.trim(),
+                status: document.getElementById('status').value,
+                approver: document.getElementById('approver').value.trim()
+            };
+
+            const actionType = recordId ? 'update' : 'create';
+            if (recordId) formData.id = recordId;
+
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'โปรดรอสักครู่ ระบบกำลังส่งข้อมูลไปยัง Google Sheets',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch(appState.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: actionType, data: formData })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกข้อมูลสำเร็จ',
+                        text: result.data.message || 'บันทึกใบสั่งจ่ายเรียบร้อยแล้ว',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    resetPaymentForm();
+                    loadAllRecords();
+                    switchTab('recordsListTab');
+                } else {
+                    Swal.fire('ข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อ API ได้: ' + err.message, 'error');
+            }
+        }
+
+        async function deleteRecord(id, docNo) {
+            const confirm = await Swal.fire({
+                title: `ยืนยันการลบเอกสาร?`,
+                text: `คุณต้องการลบใบสั่งจ่ายเลขที่ ${docNo} หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ลบเอกสาร',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            Swal.showLoading();
+            try {
+                const response = await fetch(appState.apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    Swal.fire('ลบสำเร็จ', 'ลบเอกสารใบสั่งจ่ายเรียบร้อยแล้ว', 'success');
+                    loadAllRecords();
+                } else {
+                    Swal.fire('ข้อผิดพลาด', result.message || 'ลบข้อมูลล้มเหลว', 'error');
+                }
+            } catch (err) {
+                Swal.fire('ข้อผิดพลาด', err.message, 'error');
+            }
+        }
+
+        function editRecord(id) {
+            const rec = appState.records.find(r => r.id === id);
+            if (!rec) return;
+
+            document.getElementById('recordId').value = rec.id;
+            document.getElementById('doc_no').value = rec.doc_no || '';
+            document.getElementById('doc_date').value = rec.doc_date || '';
+            document.getElementById('cheque_no').value = rec.cheque_no || '';
+            document.getElementById('cheque_date').value = rec.cheque_date || '';
+            document.getElementById('payee_name').value = rec.payee_name || '';
+            document.getElementById('amount_number').value = rec.amount_number || '';
+            document.getElementById('amount_text').value = rec.amount_text || '';
+            document.getElementById('bank_name').value = rec.bank_name || 'ธนาคารกรุงไทย';
+            document.getElementById('bank_branch').value = rec.bank_branch || '';
+            document.getElementById('bank_account').value = rec.bank_account || '';
+            document.getElementById('payment_reason').value = rec.payment_reason || '';
+            document.getElementById('status').value = rec.status || 'รอพิมพ์';
+            document.getElementById('approver').value = rec.approver || '';
+
+            document.getElementById('formTitleText').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> แก้ไขใบสั่งจ่าย / เช็ค';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            switchTab('createFormTab');
+        }
+
+        function cancelEditMode() {
+            resetPaymentForm();
+            document.getElementById('formTitleText').innerHTML = '<i class="fa-solid fa-file-circle-plus"></i> ออกใบสั่งจ่าย / พิมพ์เช็คใหม่';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function resetPaymentForm() {
+            document.getElementById('paymentOrderForm').reset();
+            document.getElementById('recordId').value = '';
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('doc_date').value = today;
+            document.getElementById('cheque_date').value = today;
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        /**
+         * =========================================================================
+         * RENDER DASHBOARD & TABLES
+         * =========================================================================
+         */
+        function renderDashboardStats() {
+            const totalDocs = appState.records.length;
+            const totalAmount = appState.records.reduce((sum, r) => sum + (parseFloat(r.amount_number) || 0), 0);
+            const pendingPrint = appState.records.filter(r => r.status === 'รอพิมพ์').length;
+            const printed = appState.records.filter(r => r.status === 'พิมพ์แล้ว').length;
+
+            document.getElementById('statTotalDocs').innerText = `${totalDocs} รายการ`;
+            document.getElementById('statTotalAmount').innerText = `${totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`;
+            document.getElementById('statPendingPrint').innerText = `${pendingPrint} รายการ`;
+            document.getElementById('statPrinted').innerText = `${printed} รายการ`;
+        }
+
+        function renderRecentOrdersTable() {
+            const tbody = document.getElementById('recentOrdersTbody');
+            const recs = appState.records.slice(0, 5); // 5 รายการล่าสุด
+
+            if (recs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">ยังไม่มีข้อมูลใบสั่งจ่าย</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = recs.map(r => `
+                <tr>
+                    <td><strong>${r.doc_no || '-'}</strong></td>
+                    <td>${formatThaiDate(r.doc_date)}</td>
+                    <td>${r.payee_name || '-'}</td>
+                    <td class="text-right">${(parseFloat(r.amount_number) || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                    <td>${r.cheque_no || '-'}</td>
+                    <td>${getStatusBadge(r.status)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="openOfficialViewModal('${r.id}')"><i class="fa-solid fa-eye"></i> ดูเอกสาร</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAllRecordsTable(records) {
+            const tbody = document.getElementById('allRecordsTbody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">ไม่พบรายการใบสั่งจ่าย</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = records.map((r, index) => `
+                <tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td><strong>${r.doc_no || '-'}</strong></td>
+                    <td>${formatThaiDate(r.doc_date)}</td>
+                    <td>${r.payee_name || '-'}</td>
+                    <td class="text-right">${(parseFloat(r.amount_number) || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                    <td>${r.cheque_no || '-'}</td>
+                    <td>${getStatusBadge(r.status)}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" title="ดู/พิมพ์เอกสารทางการ A4" onclick="openOfficialViewModal('${r.id}')">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" title="พิมพ์สลิป 80mm บลูทูธ" onclick="printThermal80mmByRecordId('${r.id}')">
+                            <i class="fa-solid fa-print"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" title="แก้ไข" onclick="editRecord('${r.id}')">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" title="ลบ" onclick="deleteRecord('${r.id}', '${r.doc_no}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterRecords() {
+            const kw = document.getElementById('searchKeyword').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+
+            const filtered = appState.records.filter(r => {
+                const matchKw = (r.doc_no || '').toLowerCase().includes(kw) ||
+                                (r.payee_name || '').toLowerCase().includes(kw) ||
+                                (r.cheque_no || '').toLowerCase().includes(kw) ||
+                                (r.payment_reason || '').toLowerCase().includes(kw);
+                const matchStatus = (status === 'ALL') || (r.status === status);
+                return matchKw && matchStatus;
+            });
+
+            renderAllRecordsTable(filtered);
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'พิมพ์แล้ว') return '<span class="badge badge-success"><i class="fa-solid fa-check"></i> พิมพ์แล้ว</span>';
+            if (status === 'ยกเลิก') return '<span class="badge badge-danger"><i class="fa-solid fa-xmark"></i> ยกเลิก</span>';
+            return '<span class="badge badge-warning"><i class="fa-solid fa-clock"></i> รอพิมพ์</span>';
+        }
+
+        function formatThaiDate(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const year = parseInt(parts[0]) + 543;
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const month = months[parseInt(parts[1]) - 1];
+            return `${parseInt(parts[2])} ${month} ${year}`;
+        }
+
+        /**
+         * =========================================================================
+         * WEB BLUETOOTH ESC/POS THERMAL PRINTER (80mm) DRIVER
+         * =========================================================================
+         */
+        async function connectBluetoothPrinter() {
+            try {
+                Swal.fire({
+                    title: 'กำลังค้นหาเครื่องพิมพ์...',
+                    text: 'กรุณาเปิดบลูทูธที่เครื่องพิมพ์ใบเสร็จ 80mm',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Request Bluetooth Device
+                appState.bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: PRINTER_UUIDS.services
+                });
+
+                appState.bluetoothDevice.addEventListener('gattserverdisconnected', onPrinterDisconnected);
+
+                // Connect GATT Server
+                appState.gattServer = await appState.bluetoothDevice.gatt.connect();
+
+                // Find Available Print Service & Characteristic
+                let foundCharacteristic = null;
+                for (const serviceUuid of PRINTER_UUIDS.services) {
+                    try {
+                        const service = await appState.gattServer.getPrimaryService(serviceUuid);
+                        for (const charUuid of PRINTER_UUIDS.characteristics) {
+                            try {
+                                foundCharacteristic = await service.getCharacteristic(charUuid);
+                                if (foundCharacteristic) break;
+                            } catch (e) {}
+                        }
+                    } catch (e) {}
+                    if (foundCharacteristic) break;
+                }
+
+                if (!foundCharacteristic) {
+                    // Fallback to first available service/characteristic
+                    const services = await appState.gattServer.getPrimaryServices();
+                    if (services.length > 0) {
+                        const characteristics = await services[0].getCharacteristics();
+                        if (characteristics.length > 0) {
+                            foundCharacteristic = characteristics[0];
+                        }
+                    }
+                }
+
+                if (!foundCharacteristic) {
+                    throw new Error('ไม่พบ Characteristic สำหรับสั่งพิมพ์ในเครื่องพิมพ์นี้');
+                }
+
+                appState.printCharacteristic = foundCharacteristic;
+                updatePrinterStatusUI(true, appState.bluetoothDevice.name || 'BT Printer 80mm');
+
+                Swal.fire('เชื่อมต่อสำเร็จ', `เชื่อมต่อกับเครื่องพิมพ์ "${appState.bluetoothDevice.name || 'BT-Printer'}" เรียบร้อยแล้ว`, 'success');
+
+            } catch (err) {
+                console.error('Bluetooth Connection Error:', err);
+                updatePrinterStatusUI(false);
+                Swal.fire('การเชื่อมต่อล้มเหลว', err.message || 'ไม่สามารถเชื่อมต่อเครื่องพิมพ์บลูทูธได้', 'error');
+            }
+        }
+
+        function disconnectBluetoothPrinter() {
+            if (appState.bluetoothDevice && appState.bluetoothDevice.gatt.connected) {
+                appState.bluetoothDevice.gatt.disconnect();
+            }
+            onPrinterDisconnected();
+            Swal.fire('ตัดการเชื่อมต่อ', 'ตัดการเชื่อมต่อเครื่องพิมพ์เรียบร้อยแล้ว', 'info');
+        }
+
+        function onPrinterDisconnected() {
+            appState.gattServer = null;
+            appState.printCharacteristic = null;
+            updatePrinterStatusUI(false);
+        }
+
+        function updatePrinterStatusUI(isConnected, deviceName = '') {
+            const badge = document.getElementById('printerStatusBadge');
+            const badgeText = document.getElementById('printerStatusText');
+            const infoBox = document.getElementById('printerConnectionInfo');
+            const btnConnect = document.getElementById('btnConnectPrinter');
+            const btnDisconnect = document.getElementById('btnDisconnectPrinter');
+
+            if (isConnected) {
+                badge.className = 'status-badge connected';
+                badgeText.innerText = `เชื่อมต่อแล้ว: ${deviceName}`;
+                infoBox.className = 'connection-info connected-box';
+                infoBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> เชื่อมต่อกับ: <strong>${deviceName}</strong> พร้อมใช้งาน`;
+                btnConnect.classList.add('hidden');
+                btnDisconnect.classList.remove('hidden');
+            } else {
+                badge.className = 'status-badge disconnected';
+                badgeText.innerText = 'เครื่องพิมพ์: ยังไม่เชื่อมต่อ';
+                infoBox.className = 'connection-info disconnected-box';
+                infoBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ยังไม่ได้เชื่อมต่อเครื่องพิมพ์บลูทูธ`;
+                btnConnect.classList.remove('hidden');
+                btnDisconnect.classList.add('hidden');
+            }
+        }
+
+        /**
+         * แปลงข้อความภาษาไทยให้อยู่ในรูปแบบ Byte Array TIS-620 สำหรับ ESC/POS Thermal Printer
+         */
+        function encodeThaiTIS620(str) {
+            const bytes = [];
+            for (let i = 0; i < str.length; i++) {
+                let code = str.charCodeAt(i);
+                if (code >= 0x0E01 && code <= 0x0E5B) {
+                    // แปลง Unicode ไทยเป็น TIS-620 (0xA1 - 0xFB)
+                    bytes.push(code - 0x0E01 + 0xA1);
+                } else if (code < 128) {
+                    bytes.push(code);
+                } else {
+                    bytes.push(63); // '?' ตัวอักษรที่ไม่รองรับ
+                }
+            }
+            return bytes;
+        }
+
+        /**
+         * ส่งชุดข้อมูล Byte ไปยังเครื่องพิมพ์ผ่าน Web Bluetooth (แบ่ง Chunk 100 bytes เพื่อความเสถียร)
+         */
+        async function sendToPrinter(uint8ArrayData) {
+            if (!appState.printCharacteristic) {
+                throw new Error('ยังไม่ได้เชื่อมต่อเครื่องพิมพ์บลูทูธ กรุณาเชื่อมต่อเครื่องพิมพ์ก่อน');
+            }
+
+            const chunkSize = 100;
+            for (let i = 0; i < uint8ArrayData.length; i += chunkSize) {
+                const chunk = uint8ArrayData.slice(i, i + chunkSize);
+                await appState.printCharacteristic.writeValue(chunk);
+                await new Promise(r => setTimeout(r, 40)); // หน่วงเวลาเล็กน้อยเพื่อไม่ให้ Buffer เต็ม
+            }
+        }
+
+        /**
+         * คำสั่ง ESC/POS Helper Commands
+         */
+        const ESC_POS = {
+            INIT: [0x1B, 0x40],                       // Initialize Printer
+            ALIGN_LEFT: [0x1B, 0x61, 0x00],            // จัดชิดซ้าย
+            ALIGN_CENTER: [0x1B, 0x61, 0x01],          // จัดกึ่งกลาง
+            ALIGN_RIGHT: [0x1B, 0x61, 0x02],           // จัดชิดขวา
+            TXT_NORMAL: [0x1D, 0x21, 0x00],            // ขนาดตัวหนังสือปกติ
+            TXT_DOUBLE_HEIGHT: [0x1D, 0x21, 0x01],     // ตัวหนังสือสูง 2 เท่า
+            TXT_DOUBLE_WIDTH: [0x1D, 0x21, 0x10],      // ตัวหนังกว้าง 2 เท่า
+            TXT_BIG: [0x1D, 0x21, 0x11],               // ตัวหนังสือใหญ่ 2 เท่า (กว้างxสูง)
+            BOLD_ON: [0x1B, 0x45, 0x01],               // ตัวหนา
+            BOLD_OFF: [0x1B, 0x45, 0x00],              // ปิดตัวหนา
+            FEED_LINES: (n) => [0x1B, 0x64, n],        // เลื่อนกระดาษ n บรรทัด
+            AUTO_CUT: [0x1D, 0x56, 0x42, 0x00]          // สั่งตัดกระดาษอัตโนมัติ (GS V 66 0)
+        };
+
+        async function testPrintThermal80mm() {
+            try {
+                if (!appState.printCharacteristic) {
+                    await connectBluetoothPrinter();
+                }
+
+                Swal.fire({ title: 'กำลังทดสอบพิมพ์...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                let buffer = [];
+                buffer.push(...ESC_POS.INIT);
+                buffer.push(...ESC_POS.ALIGN_CENTER);
+                buffer.push(...ESC_POS.TXT_BIG);
+                buffer.push(...ESC_POS.BOLD_ON);
+                buffer.push(...encodeThaiTIS620("TNBJO PAYMENT SYSTEM\n"));
+                buffer.push(...ESC_POS.TXT_NORMAL);
+                buffer.push(...ESC_POS.BOLD_OFF);
+                buffer.push(...encodeThaiTIS620("--------------------------------\n"));
+                buffer.push(...encodeThaiTIS620("ทดสอบการพิมพ์เช็ค & ใบสั่งจ่าย 80mm\n"));
+                buffer.push(...encodeThaiTIS620("ระบบเครื่องพิมพ์บลูทูธพร้อมใช้งาน 100%\n"));
+                buffer.push(...encodeThaiTIS620("--------------------------------\n"));
+                buffer.push(...ESC_POS.FEED_LINES(4));
+                buffer.push(...ESC_POS.AUTO_CUT); // ตัดกระดาษอัตโนมัติ
+
+                await sendToPrinter(new Uint8Array(buffer));
+                Swal.fire('ทดสอบสำเร็จ', 'ส่งคำสั่งพิมพ์และตัดกระดาษเรียบร้อยแล้ว', 'success');
+
+            } catch (err) {
+                Swal.fire('ข้อผิดพลาด', err.message, 'error');
+            }
+        }
+
+        async function printThermal80mmByRecordId(id) {
+            const rec = appState.records.find(r => r.id === id);
+            if (!rec) return;
+
+            try {
+                if (!appState.printCharacteristic) {
+                    const conn = await Swal.fire({
+                        title: 'ไม่ได้เชื่อมต่อเครื่องพิมพ์',
+                        text: 'ต้องการค้นหาและเชื่อมต่อเครื่องพิมพ์บลูทูธตอนนี้หรือไม่?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'เชื่อมต่อเครื่องพิมพ์',
+                        cancelButtonText: 'ยกเลิก'
+                    });
+                    if (conn.isConfirmed) {
+                        await connectBluetoothPrinter();
+                    } else {
+                        return;
+                    }
+                }
+
+                Swal.fire({ title: 'กำลังพิมพ์สลิปใบสั่งจ่าย...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                let buffer = [];
+                buffer.push(...ESC_POS.INIT);
+
+                // Header
+                buffer.push(...ESC_POS.ALIGN_CENTER);
+                buffer.push(...ESC_POS.TXT_BIG);
+                buffer.push(...ESC_POS.BOLD_ON);
+                buffer.push(...encodeThaiTIS620("ใบสั่งจ่ายเงิน / CHEQUE VOUCHER\n"));
+                buffer.push(...ESC_POS.TXT_NORMAL);
+                buffer.push(...ESC_POS.BOLD_OFF);
+                buffer.push(...encodeThaiTIS620("Powered by TNBJO\n"));
+                buffer.push(...encodeThaiTIS620("================================\n"));
+
+                // Document Body
+                buffer.push(...ESC_POS.ALIGN_LEFT);
+                buffer.push(...encodeThaiTIS620(`เลขที่ใบสั่งจ่าย : ${rec.doc_no || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`วันที่สั่งจ่าย     : ${formatThaiDate(rec.doc_date)}\n`));
+                buffer.push(...encodeThaiTIS620(`เลขที่เช็ค       : ${rec.cheque_no || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`วันที่บนเช็ค     : ${formatThaiDate(rec.cheque_date)}\n`));
+                buffer.push(...encodeThaiTIS620("--------------------------------\n"));
+                
+                buffer.push(...ESC_POS.BOLD_ON);
+                buffer.push(...encodeThaiTIS620(`สั่งจ่ายให้ : ${rec.payee_name || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`จำนวนเงิน : ${(parseFloat(rec.amount_number) || 0).toLocaleString('th-TH', {minimumFractionDigits:2})} บาท\n`));
+                buffer.push(...encodeThaiTIS620(`(${rec.amount_text || '-'})\n`));
+                buffer.push(...ESC_POS.BOLD_OFF);
+                buffer.push(...encodeThaiTIS620("--------------------------------\n"));
+
+                buffer.push(...encodeThaiTIS620(`ธนาคาร    : ${rec.bank_name || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`สาขา      : ${rec.bank_branch || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`เลขที่บัญชี  : ${rec.bank_account || '-'}\n`));
+                buffer.push(...encodeThaiTIS620(`ชำระค่า    : ${rec.payment_reason || '-'}\n`));
+                buffer.push(...encodeThaiTIS620("================================\n"));
+
+                // Signature Section
+                buffer.push(...ESC_POS.ALIGN_CENTER);
+                buffer.push(...ESC_POS.FEED_LINES(2));
+                buffer.push(...encodeThaiTIS620("ลงชื่อ......................................................ผู้จ่ายเงิน\n"));
+                buffer.push(...encodeThaiTIS620(`( ${rec.approver || '......................................................'} )\n`));
+                buffer.push(...ESC_POS.FEED_LINES(2));
+                buffer.push(...encodeThaiTIS620("ลงชื่อ......................................................ผู้รับเงิน\n"));
+                buffer.push(...encodeThaiTIS620("วันที่ ......./......./.......\n"));
+
+                // Footer Feed & Cut
+                buffer.push(...ESC_POS.FEED_LINES(4));
+                buffer.push(...ESC_POS.AUTO_CUT);
+
+                await sendToPrinter(new Uint8Array(buffer));
+
+                // อัปเดตสถานะใน Google Sheet เป็น "พิมพ์แล้ว"
+                if (rec.status !== 'พิมพ์แล้ว' && appState.apiUrl) {
+                    fetch(appState.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'update', data: { id: rec.id, status: 'พิมพ์แล้ว' } })
+                    }).then(() => loadAllRecords());
+                }
+
+                Swal.fire('พิมพ์สำเร็จ', 'สั่งพิมพ์และตัดกระดาษเรียบร้อยแล้ว', 'success');
+
+            } catch (err) {
+                Swal.fire('ข้อผิดพลาดการพิมพ์', err.message, 'error');
+            }
+        }
+
+        /**
+         * =========================================================================
+         * OFFICIAL DOCUMENT MODAL & A4 PRINTING
+         * =========================================================================
+         */
+        function openOfficialViewModal(id) {
+            const rec = appState.records.find(r => r.id === id);
+            if (!rec) return;
+
+            appState.activeRecordForModal = rec;
+            const container = document.getElementById('officialDocumentPrintArea');
+
+            container.innerHTML = `
+                <div class="official-paper">
+                    <div class="paper-header">
+                        <div class="garuda-logo">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <h2>ใบสั่งจ่ายเงิน / CHEQUE VOUCHER</h2>
+                        <p class="org-sub">Powered by TNBJO - เอกสารเบิกจ่ายเงินทางการ</p>
+                    </div>
+
+                    <div class="paper-meta-grid">
+                        <div><strong>เลขที่ใบสั่งจ่าย:</strong> ${rec.doc_no || '-'}</div>
+                        <div><strong>วันที่:</strong> ${formatThaiDate(rec.doc_date)}</div>
+                        <div><strong>เลขที่เช็ค:</strong> ${rec.cheque_no || '-'}</div>
+                        <div><strong>วันที่เช็ค:</strong> ${formatThaiDate(rec.cheque_date)}</div>
+                    </div>
+
+                    <hr class="paper-divider">
+
+                    <table class="paper-details-table">
+                        <tr>
+                            <td class="label">สั่งจ่ายให้ (ผู้รับเงิน):</td>
+                            <td class="value"><strong>${rec.payee_name || '-'}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="label">จำนวนเงิน (ตัวเลข):</td>
+                            <td class="value"><span class="amount-highlight">${(parseFloat(rec.amount_number) || 0).toLocaleString('th-TH', {minimumFractionDigits:2})} บาท</span></td>
+                        </tr>
+                        <tr>
+                            <td class="label">จำนวนเงิน (ตัวอักษร):</td>
+                            <td class="value"><strong>( ${rec.amount_text || '-'} )</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="label">ธนาคาร / สาขา:</td>
+                            <td class="value">${rec.bank_name || '-'} สาขา ${rec.bank_branch || '-'} (เลขบัญชี: ${rec.bank_account || '-'})</td>
+                        </tr>
+                        <tr>
+                            <td class="label">ชำระค่า / รายละเอียด:</td>
+                            <td class="value">${rec.payment_reason || '-'}</td>
+                        </tr>
+                    </table>
+
+                    <div class="paper-signatures">
+                        <div class="sig-box">
+                            <p>ลงชื่อ......................................................ผู้จ่ายเงิน</p>
+                            <p>( ${rec.approver || '......................................................'} )</p>
+                            <p>ตำแหน่ง......................................................</p>
+                        </div>
+                        <div class="sig-box">
+                            <p>ลงชื่อ......................................................ผู้รับเงิน</p>
+                            <p>( ...................................................... )</p>
+                            <p>วันที่ ......./......./.......\</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('officialViewModal').classList.remove('hidden');
+        }
+
+        function closeOfficialModal() {
+            document.getElementById('officialViewModal').classList.add('hidden');
+            appState.activeRecordForModal = null;
+        }
+
+        function printOfficialDocumentA4() {
+            window.print();
+        }
+
+        function triggerThermalPrintFromModal() {
+            if (appState.activeRecordForModal) {
+                printThermal80mmByRecordId(appState.activeRecordForModal.id);
+            }
+        }
+    </script>
+</body>
+</html>
